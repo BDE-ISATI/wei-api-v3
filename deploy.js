@@ -41,4 +41,6 @@ async function initRedis() {
     const defis = await redis_tools.listDefi(client);
 
     console.log(defis);
+
+    await client.disconnect();
 }
