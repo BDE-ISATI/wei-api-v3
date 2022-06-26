@@ -134,6 +134,6 @@ client.on("error", (err) => console.log("Redis Client Error", err));
 initRedis();
 
 async function initRedis() {
-	Console.log("Initiating redis");
+	console.log("Initiating redis");
 	await client.connect();
 }
