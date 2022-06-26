@@ -2,7 +2,7 @@ const http = require("http");
 const redis_tools = require("./redis_tools");
 
 // Listen on a specific host via the HOST environment variable
-var host = process.env.HOST || "127.0.0.1";
+var host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 80;
 
