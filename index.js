@@ -1,12 +1,31 @@
 const http = require("http");
-const redis = require("redis");
-const client = redis.createClient({url: process.env.REDIS_URL});
+const redis_tools = require("./redis_tools");
 
+// Listen on a specific host via the HOST environment variable
+var host = process.env.HOST || "127.0.0.1";
+// Listen on a specific port via the PORT environment variable
+var port = process.env.PORT || 8080;
 
 const RequestType = {
-	GetDefi: "defis",
 	GetClassement: "classement",
+
+	GetUserAuth: "auth",
 	GetUserPerm: "permissions",
+	GetUser: "user",
+	CreateUser: "create_user",
+	DeleteUser: "delete_user",
+
+	GetDefi: "defis",
+	CreateDefi: "create_defi",
+	DeleteDefi: "delete_defi",
+	ValidateDefi: "validate_defi",
+};
+
+const Perm = {
+	all: "all",
+	manager: "manager",
+	player: "player",
+	none: "none",
 };
 
 const server = http.createServer(function (request, response) {
@@ -21,73 +40,98 @@ const server = http.createServer(function (request, response) {
 			body += data;
 		});
 
-		request.on("end", function () {
-            console.log("Parsing: " + body);
+		request.on("end", async function () {
+			console.log("Parsing: " + body);
 
-            var bodyJson = JSON.parse(body);
-    
-            var answer = {};
-    
-            if (bodyJson.type) {
-                switch (bodyJson.type) {
-                    case RequestType.GetDefi:
-                        console.log("Requested defis");
-                        answer = [
-                            { name: "Iroquoise", description: "Faire une iroquoise pendant un LI", points: -1 },
-                            {
-                                name: "Pro musical",
-                                description:
-                                    "Aller faire un solo au club de musique",
-                                points: 10,
-                            },
-                            {
-                                name: "Smooth",
-                                description: "Faire un rasage intégral",
-                                points: -1,
-                            },
-                            {
-                                name: "Couisine",
-                                description:
-                                    "Participer au concours de cuisine (le jury choisis les points)",
-                                points: -1,
-                            },
-                            {
-                                name: "Before Sleep",
-                                description: "Participer au 1er afterwork",
-                                points: 69,
-                            },
-                            {
-                                name: "Patriote",
-                                description:
-                                    "Faire un drapeau pour son équipe et l'afficher dans le hall",
-                                points: -1,
-                            },
-                        ];
-                        break;
-                    default:
-                        break;
-                }
-            }
-    
-            response.writeHead(200, { "Content-Type": "application/json" });
-            response.end(JSON.stringify(answer));
-        });
-	} else if (request.method == "GET") {
-		console.log("GET");
+			var bodyJson = JSON.parse(body);
 
-		var body = "";
+			var answer = {};
 
-		request.on("data", function (data) {
-			body += data;
+			if (bodyJson.type) {
+				switch (bodyJson.type) {
+					case RequestType.GetUserAuth:
+						var auth = await redis_tools.authUser(
+							client,
+							bodyJson.data.username,
+							bodyJson.data.password
+						);
+
+						answer = { auth: auth };
+						break;
+					case RequestType.GetUserPerm:
+						var user = await redis_tools.getUser(
+							client,
+							bodyJson.data.username,
+							bodyJson.data.password
+						);
+
+						answer = { perms: user.perms };
+						break;
+					case RequestType.GetUser:
+						var user = await redis_tools.getUser(
+							client,
+							bodyJson.data.username,
+							bodyJson.data.password
+						);
+
+						answer = { user: user };
+						break;
+					case RequestType.CreateUser:
+						await redis_tools.createUser(
+							client,
+							bodyJson.data.username,
+							bodyJson.data.nickname,
+							bodyJson.data.perms,
+							bodyJson.data.password
+						);
+						break;
+					case RequestType.DeleteUser:
+						await redis_tools.deleteUser(
+							client,
+							bodyJson.data.username
+						);
+						break;
+					case RequestType.GetDefi:
+						var defi = await redis_tools.listDefi(client);
+						console.log(defi);
+						answer = defi;
+						break;
+					case RequestType.CreateDefi:
+						await redis_tools.createDefi(
+							client,
+							bodyJson.data.username,
+							bodyJson.data.password,
+							bodyJson.data.name,
+							bodyJson.data.description,
+							bodyJson.data.points
+						);
+						break;
+					case RequestType.DeleteDefi:
+						break;
+					case RequestType.ValidateDefi:
+						break;
+					default:
+						break;
+				}
+			}
+
+			response.writeHead(200, { "Content-Type": "application/json" });
+			response.end(JSON.stringify(answer));
 		});
-
-		request.on("end", function () {});
-		response.writeHead(200, { "Content-Type": "application/json" });
-		response.end();
 	}
 });
 
-const port = 3100;
-const host = "127.0.0.1";
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
+
+//Redis stuff
+const redis = require("redis");
+const client = redis.createClient({ url: process.env.REDIS_URL });
+
+client.on("error", (err) => console.log("Redis Client Error", err));
+
+initRedis();
+
+async function initRedis() {
+	await client.connect();
+}
