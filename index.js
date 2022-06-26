@@ -28,7 +28,6 @@ const Perm = {
 	none: "none",
 };
 
-
 //Redis stuff
 const redis = require("redis");
 const { Console } = require("console");
@@ -42,9 +41,6 @@ async function initRedis() {
 }
 
 initRedis();
-
-
-
 
 const server = http.createServer(function (request, response) {
 	console.dir(request.param);
@@ -95,35 +91,50 @@ const server = http.createServer(function (request, response) {
 						answer = { user: user };
 						break;
 					case RequestType.CreateUser:
-						await redis_tools.createUser(
+						var result = await redis_tools.createUser(
 							client,
 							bodyJson.data.username,
 							bodyJson.data.nickname,
 							bodyJson.data.perms,
 							bodyJson.data.password
 						);
+
+						answer = { result: result };
 						break;
 					case RequestType.DeleteUser:
-						await redis_tools.deleteUser(
+						var result = await redis_tools.deleteUser(
 							client,
 							bodyJson.data.username
 						);
+
+						answer = { result: result };
 						break;
 					case RequestType.GetDefi:
 						var defis = await redis_tools.listDefi(client);
 						answer = defis;
 						break;
 					case RequestType.CreateDefi:
-						await redis_tools.createDefi(
+						var result = await redis_tools.createDefi(
 							client,
 							bodyJson.data.username,
 							bodyJson.data.password,
 							bodyJson.data.name,
+							bodyJson.data.id,
 							bodyJson.data.description,
 							bodyJson.data.points
 						);
+
+						answer = { result: result };
 						break;
 					case RequestType.DeleteDefi:
+						var result = await redis_tools.deleteDefi(
+							client,
+							bodyJson.data.username,
+							bodyJson.data.password,
+							bodyJson.data.id
+						);
+
+						answer = { result: result };
 						break;
 					case RequestType.ValidateDefi:
 						break;
@@ -140,4 +151,3 @@ const server = http.createServer(function (request, response) {
 
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
-

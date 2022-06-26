@@ -32,11 +32,7 @@ async function initRedis() {
 
     await client.del("key");*/
 
-    //await redis_tools.createDefi(client, "admin", "test", "Iroquoise", "Faire une iroquoise pendant un LI", 10);
-    //await redis_tools.createDefi(client, "admin", "test", "Pro musical", "Pourquoi pas", 10);
-    //await redis_tools.createDefi(client, "admin", "test", "Je", "Faire une irazdazdzadza", 5465);
-    //await redis_tools.createDefi(client, "admin", "test", "azdazdazd", "Faire une azdazdzadad", 5465);
-    //await redis_tools.createDefi(client, "admin", "azdazd", "boudiou", "Faire une azdazdzadad", 5465);
+    //await redis_tools.createDefi(client, "admin", "test", "Iroquoise", "iro", "Faire une iroquoise pendant un LI", 10);
 
     const defis = await redis_tools.listDefi(client);
 
