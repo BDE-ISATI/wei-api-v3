@@ -29,7 +29,17 @@ const Perm = {
 };
 
 
+//Redis stuff
+const redis = require("redis");
+const { Console } = require("console");
+const client = redis.createClient({ url: process.env.REDIS_URL });
 
+client.on("error", (err) => console.log("Redis Client Error", err));
+
+async function initRedis() {
+	console.log("Initiating redis");
+	await client.connect();
+}
 
 initRedis();
 
@@ -132,14 +142,3 @@ const server = http.createServer(function (request, response) {
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
 
-//Redis stuff
-const redis = require("redis");
-const { Console } = require("console");
-const client = redis.createClient({ url: process.env.REDIS_URL });
-
-client.on("error", (err) => console.log("Redis Client Error", err));
-
-async function initRedis() {
-	console.log("Initiating redis");
-	await client.connect();
-}
