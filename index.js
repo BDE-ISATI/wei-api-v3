@@ -28,6 +28,14 @@ const Perm = {
 	none: "none",
 };
 
+
+
+
+initRedis();
+
+
+
+
 const server = http.createServer(function (request, response) {
 	console.dir(request.param);
 
@@ -130,8 +138,6 @@ const { Console } = require("console");
 const client = redis.createClient({ url: process.env.REDIS_URL });
 
 client.on("error", (err) => console.log("Redis Client Error", err));
-
-initRedis();
 
 async function initRedis() {
 	console.log("Initiating redis");
