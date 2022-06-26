@@ -126,6 +126,7 @@ console.log(`Listening at http://${host}:${port}`);
 
 //Redis stuff
 const redis = require("redis");
+const { Console } = require("console");
 const client = redis.createClient({ url: process.env.REDIS_URL });
 
 client.on("error", (err) => console.log("Redis Client Error", err));
@@ -133,5 +134,6 @@ client.on("error", (err) => console.log("Redis Client Error", err));
 initRedis();
 
 async function initRedis() {
+	Console.log("Initiating redis");
 	await client.connect();
 }
