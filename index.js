@@ -110,9 +110,8 @@ const server = http.createServer(function (request, response) {
 						);
 						break;
 					case RequestType.GetDefi:
-						var defi = await redis_tools.listDefi(client);
-						console.log(defi);
-						answer = defi;
+						var defis = await redis_tools.listDefi(client);
+						answer = defis;
 						break;
 					case RequestType.CreateDefi:
 						await redis_tools.createDefi(
