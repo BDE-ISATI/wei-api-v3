@@ -266,6 +266,7 @@ module.exports = {
 	deleteUser,
 	authUser,
 	getUser,
+	getAllUser,
 	createDefi,
 	deleteDefi,
 	listDefi,
