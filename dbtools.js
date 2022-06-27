@@ -50,7 +50,7 @@ async function createUser(
 				points: 0,
 			})
 		);
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function deleteUser(client, user, pass, usernametodel) {
@@ -73,7 +73,7 @@ async function deleteUser(client, user, pass, usernametodel) {
 		await client.select(user_db);
 
 		return await client.del(usernametodel);
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function authUser(client, username, password) {
@@ -92,7 +92,7 @@ async function authUser(client, username, password) {
 		//If password doesn't match, no auth. Else it worked
 		if (user.password != password) return false;
 		else return true;
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function getPermsUser(client, username) {
@@ -108,7 +108,7 @@ async function getPermsUser(client, username) {
 		//Return perms if it exists, else return no
 		if (user.perms) return user.perms;
 		else return Perm.none;
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function getUser(client, username) {
@@ -125,7 +125,7 @@ async function getUser(client, username) {
 		if (user.password) user.password = null;
 
 		return user;
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function createDefi(client, user, pass, name, id, description, points) {
@@ -153,7 +153,7 @@ async function createDefi(client, user, pass, name, id, description, points) {
 				points: points,
 			})
 		);
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function deleteDefi(client, user, pass, id) {
@@ -173,7 +173,7 @@ async function deleteDefi(client, user, pass, id) {
 
 		//Delete
 		return await client.del(id);
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 async function listDefi(client) {
@@ -192,10 +192,10 @@ async function listDefi(client) {
 			//Convert keys to defis
 			const defis = keys.map(async (x) => await client.get(x));
 			return await defis.map((x) => JSON.parse(x));
-		} catch (error) {}
+		} catch (error) {console.log(error)}
 
 		return [];
-	} catch (error) {}
+	} catch (error) {console.log(error)}
 }
 
 module.exports = {
