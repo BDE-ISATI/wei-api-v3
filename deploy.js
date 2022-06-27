@@ -22,7 +22,7 @@ async function initRedis() {
 
     await client.flushAll();
 
-    await db.createUser(client, "", "", "admin", "Théo", "all", "test");
+    await db.createUser(client, "", "", "admin", "Théo", db.Perm.all, "test");
 
 	/*await client.set("defis", "");
 

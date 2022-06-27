@@ -208,4 +208,5 @@ module.exports = {
 	listDefi,
 	user_db,
 	defis_db,
+	Perm
 };
