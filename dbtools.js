@@ -69,7 +69,7 @@ async function deleteUser(client, user, pass, usernametodel) {
 		//Check permissions
 		const userperms = await getPermsUser(client, user);
 		const minperms = await getPermsUser(client, usernametodel);
-		if (userpems < Perm.manager && userperms <= minperms) return false;
+		if (userperms < Perm.manager && userperms <= minperms) return false;
 
 		//Select the db
 		await client.select(user_db);
