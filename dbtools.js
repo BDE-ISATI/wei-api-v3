@@ -190,8 +190,11 @@ async function listDefi(client) {
 
 		try {
 			//Convert keys to defis
-			const defis = keys.map(async (x) => await client.get(x));
-			console.log(defis);
+			var defis = [];
+			await keys.forEach(async (key) => {
+				const d = await client.get(x)
+				defis.push(d);
+			});
 			return await defis.map((x) => JSON.parse(x));
 		} catch (error) {console.log(error)}
 
