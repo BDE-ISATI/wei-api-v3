@@ -13,153 +13,189 @@ const Perm = {
 
 const redis = require("redis");
 
-async function createUser(client, user, pass, username, nickname, perms, password) {
-	
-	if (await client.exists("admin")) {
-		//The user must be connected
-		const isAuth = await authUser(client, user, pass);
-		if (!isAuth) return false;
-	
-		//Get the perms. It must be greater than Perm.player
-		const perms = await getPermsUser(client, user);
-		if (perms < Perm.manager) return false;
-	}
+async function createUser(
+	client,
+	user,
+	pass,
+	username,
+	nickname,
+	perms,
+	password
+) {
+	console.log("Creating user...");
+	try {
+		if (await client.exists("admin")) {
+			//The user must be connected
+			const isAuth = await authUser(client, user, pass);
+			if (!isAuth) return false;
 
-	//Select the db
-	await client.select(user_db);
+			//Get the perms. It must be greater than Perm.player
+			const perms = await getPermsUser(client, user);
+			if (perms < Perm.manager) return false;
+		}
 
-	//If user already exists, leave
-	if (await client.exists(username)) return false;
+		//Select the db
+		await client.select(user_db);
 
-	//Try creating
-	return await client.set(
-		username,
-		JSON.stringify({
-			nickname: nickname,
-			perms: perms,
-			password: password,
-			points: 0,
-		})
-	);
+		//If user already exists, leave
+		if (await client.exists(username)) return false;
+
+		//Try creating
+		return await client.set(
+			username,
+			JSON.stringify({
+				nickname: nickname,
+				perms: perms,
+				password: password,
+				points: 0,
+			})
+		);
+	} catch (error) {}
 }
 
 async function deleteUser(client, user, pass, usernametodel) {
-	//Lol
-	if (usernametodel == "admin") return false;
+	console.log("Deleting user...");
 
-	//The user must be connected
-    const isAuth = await authUser(client, user, pass);
-    if (!isAuth) return false;
+	try {
+		//Lol
+		if (usernametodel == "admin") return false;
 
-	//Check permissions
-	const userperms = await getPermsUser(client, user);
-	const minperms = await getPermsUser(client, usernametodel);
-	if (userpems < Perm.manager && userperms <= minperms) return false;
+		//The user must be connected
+		const isAuth = await authUser(client, user, pass);
+		if (!isAuth) return false;
 
-	//Select the db
-	await client.select(user_db);
+		//Check permissions
+		const userperms = await getPermsUser(client, user);
+		const minperms = await getPermsUser(client, usernametodel);
+		if (userpems < Perm.manager && userperms <= minperms) return false;
 
-	return await client.del(usernametodel);
+		//Select the db
+		await client.select(user_db);
+
+		return await client.del(usernametodel);
+	} catch (error) {}
 }
 
 async function authUser(client, username, password) {
-	//Select db
-	await client.select(user_db);
+	console.log("Auth user...");
 
-	//Get user data
-	var user = JSON.parse(await client.get(username));
+	try {
+		//Select db
+		await client.select(user_db);
 
-	//If it doesn't exists, return not auth
-	if (!user) return false;
+		//Get user data
+		var user = JSON.parse(await client.get(username));
 
-	//If password doesn't match, no auth. Else it worked
-	if (user.password != password) return false;
-	else return true;
+		//If it doesn't exists, return not auth
+		if (!user) return false;
+
+		//If password doesn't match, no auth. Else it worked
+		if (user.password != password) return false;
+		else return true;
+	} catch (error) {}
 }
 
 async function getPermsUser(client, username) {
-	//Select db
-	await client.select(user_db);
+	console.log("Checking user perms...");
 
-	//Get user data
-    const user = JSON.parse(await client.get(username));
+	try {
+		//Select db
+		await client.select(user_db);
 
-	//Return perms if it exists, else return no
-	if (user.perms) return user.perms;
-	else return Perm.none;
+		//Get user data
+		const user = JSON.parse(await client.get(username));
+
+		//Return perms if it exists, else return no
+		if (user.perms) return user.perms;
+		else return Perm.none;
+	} catch (error) {}
 }
 
 async function getUser(client, username) {
-	//Select the db
-	await client.select(user_db);
+	console.log("Get user...");
 
-	//Retrieve user data
-    var user = JSON.parse(await client.get(username));
+	try {
+		//Select the db
+		await client.select(user_db);
 
-	//Blank out password
-	if (user.password) user.password = null;
+		//Retrieve user data
+		var user = JSON.parse(await client.get(username));
 
-    return user;
+		//Blank out password
+		if (user.password) user.password = null;
+
+		return user;
+	} catch (error) {}
 }
 
 async function createDefi(client, user, pass, name, id, description, points) {
+	console.log("Creating defi...");
 
-	//The user must be connected
-    const isAuth = await authUser(client, user, pass);
-    if (!isAuth) return false;
+	try {
+		//The user must be connected
+		const isAuth = await authUser(client, user, pass);
+		if (!isAuth) return false;
 
-	//Get the perms. It must be greater than Perm.player
-    const perms = await getPermsUser(client, user);
-    if (perms < Perm.manager) return false;
+		//Get the perms. It must be greater than Perm.player
+		const perms = await getPermsUser(client, user);
+		if (perms < Perm.manager) return false;
 
+		//Select the db
+		await client.select(defis_db);
 
-	//Select the db
-	await client.select(defis_db);
-
-	//Create the challenge. Returns false if not created (error or whatever)
-	return await client.set(id,
-		JSON.stringify({
-			name: name,
-			id: id,
-			description: description,
-			points: points,
-		})
-	);
+		//Create the challenge. Returns false if not created (error or whatever)
+		return await client.set(
+			id,
+			JSON.stringify({
+				name: name,
+				id: id,
+				description: description,
+				points: points,
+			})
+		);
+	} catch (error) {}
 }
 
 async function deleteDefi(client, user, pass, id) {
+	console.log("Deleting defi...");
 
-	//The user must be connected
-    const isAuth = await authUser(client, user, pass);
-    if (!isAuth) return false;
+	try {
+		//The user must be connected
+		const isAuth = await authUser(client, user, pass);
+		if (!isAuth) return false;
 
-	//Get the perms. It must be greater than Perm.player
-    const perms = await getPermsUser(client, user);
-    if (perms < Perm.manager) return false;
+		//Get the perms. It must be greater than Perm.player
+		const perms = await getPermsUser(client, user);
+		if (perms < Perm.manager) return false;
 
-	//Select the db
-	await client.select(defis_db);
+		//Select the db
+		await client.select(defis_db);
 
-	//Delete
-	return await client.del(id);
+		//Delete
+		return await client.del(id);
+	} catch (error) {}
 }
 
 async function listDefi(client) {
-	//Select defi db
-	await client.select(defis_db);
-
-	//Retrieve all keys
-    const keys = await client.keys("*");
-
-	if (!keys) return [];
+	console.log("Listing defi...");
 
 	try {
-		//Convert keys to defis
-		const defis = keys.map(async (x) => await client.get(x));
-		return await defis.map(x => JSON.parse(x));
-	} catch (error) {}
+		//Select defi db
+		await client.select(defis_db);
 
-	return [];
+		//Retrieve all keys
+		const keys = await client.keys("*");
+
+		if (!keys) return [];
+
+		try {
+			//Convert keys to defis
+			const defis = keys.map(async (x) => await client.get(x));
+			return await defis.map((x) => JSON.parse(x));
+		} catch (error) {}
+
+		return [];
+	} catch (error) {}
 }
 
 module.exports = {
