@@ -1,5 +1,5 @@
 const http = require("http");
-const redis_tools = require("./redis_tools");
+const db = require("./dbtools");
 
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || "0.0.0.0";
@@ -19,13 +19,6 @@ const RequestType = {
 	CreateDefi: "create_defi",
 	DeleteDefi: "delete_defi",
 	ValidateDefi: "validate_defi",
-};
-
-const Perm = {
-	all: "all",
-	manager: "manager",
-	player: "player",
-	none: "none",
 };
 
 //Redis stuff
@@ -64,35 +57,37 @@ const server = http.createServer(function (request, response) {
 			if (bodyJson.type) {
 				switch (bodyJson.type) {
 					case RequestType.GetUserAuth:
-						var auth = await redis_tools.authUser(
+						var auth = await db.authUser(
 							client,
-							bodyJson.data.username,
-							bodyJson.data.password
+							bodyJson.data.user,
+							bodyJson.data.pass
 						);
 
 						answer = { auth: auth };
 						break;
 					case RequestType.GetUserPerm:
-						var user = await redis_tools.getUser(
+						var user = await db.getUser(
 							client,
-							bodyJson.data.username,
-							bodyJson.data.password
+							bodyJson.data.user,
+							bodyJson.data.pass
 						);
 
 						answer = { perms: user.perms };
 						break;
 					case RequestType.GetUser:
-						var user = await redis_tools.getUser(
+						var user = await db.getUser(
 							client,
-							bodyJson.data.username,
-							bodyJson.data.password
+							bodyJson.data.user,
+							bodyJson.data.pass
 						);
 
 						answer = { user: user };
 						break;
 					case RequestType.CreateUser:
-						var result = await redis_tools.createUser(
+						var result = await db.createUser(
 							client,
+							bodyJson.data.user,
+							bodyJson.data.pass,
 							bodyJson.data.username,
 							bodyJson.data.nickname,
 							bodyJson.data.perms,
@@ -102,22 +97,24 @@ const server = http.createServer(function (request, response) {
 						answer = { result: result };
 						break;
 					case RequestType.DeleteUser:
-						var result = await redis_tools.deleteUser(
+						var result = await db.deleteUser(
 							client,
+							bodyJson.data.user,
+							bodyJson.data.pass,
 							bodyJson.data.username
 						);
 
 						answer = { result: result };
 						break;
 					case RequestType.GetDefi:
-						var defis = await redis_tools.listDefi(client);
+						var defis = await db.listDefi(client);
 						answer = defis;
 						break;
 					case RequestType.CreateDefi:
-						var result = await redis_tools.createDefi(
+						var result = await db.createDefi(
 							client,
-							bodyJson.data.username,
-							bodyJson.data.password,
+							bodyJson.data.user,
+							bodyJson.data.pass,
 							bodyJson.data.name,
 							bodyJson.data.id,
 							bodyJson.data.description,
@@ -127,10 +124,10 @@ const server = http.createServer(function (request, response) {
 						answer = { result: result };
 						break;
 					case RequestType.DeleteDefi:
-						var result = await redis_tools.deleteDefi(
+						var result = await db.deleteDefi(
 							client,
-							bodyJson.data.username,
-							bodyJson.data.password,
+							bodyJson.data.user,
+							bodyJson.data.pass,
 							bodyJson.data.id
 						);
 

@@ -7,7 +7,7 @@ We add the main user, then create some test challenges.
 */
 
 
-const redis_tools = require("./redis_tools");
+const db = require("./dbtools");
 
 const redis = require("redis");
 const client = redis.createClient({ url: process.env.REDIS_URL });
@@ -22,7 +22,7 @@ async function initRedis() {
 
     await client.flushAll();
 
-    await redis_tools.createUser(client, "admin", "Théo", "all", "test");
+    await db.createUser(client, "", "", "admin", "Théo", "all", "test");
 
 	/*await client.set("defis", "");
 
@@ -34,7 +34,7 @@ async function initRedis() {
 
     //await redis_tools.createDefi(client, "admin", "test", "Iroquoise", "iro", "Faire une iroquoise pendant un LI", 10);
 
-    const defis = await redis_tools.listDefi(client);
+    const defis = await db.listDefi(client);
 
     console.log(defis);
 
