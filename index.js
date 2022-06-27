@@ -12,6 +12,7 @@ const RequestType = {
 	GetUserAuth: "auth",
 	GetUserPerm: "permissions",
 	GetUser: "user",
+	GetAllUser: "getall_user",
 	CreateUser: "create_user",
 	DeleteUser: "delete_user",
 
@@ -82,6 +83,13 @@ const server = http.createServer(function (request, response) {
 						);
 
 						answer = { user: user };
+						break;
+					case RequestType.GetAllUser:
+						var users = await db.getAllUser(
+							client
+						);
+
+						answer = { users: users };
 						break;
 					case RequestType.CreateUser:
 						var result = await db.createUser(

@@ -50,7 +50,9 @@ async function createUser(
 				points: 0,
 			})
 		);
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function deleteUser(client, user, pass, usernametodel) {
@@ -73,7 +75,9 @@ async function deleteUser(client, user, pass, usernametodel) {
 		await client.select(user_db);
 
 		return await client.del(usernametodel);
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function authUser(client, username, password) {
@@ -92,7 +96,9 @@ async function authUser(client, username, password) {
 		//If password doesn't match, no auth. Else it worked
 		if (user.password != password) return false;
 		else return true;
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function getPermsUser(client, username) {
@@ -108,7 +114,9 @@ async function getPermsUser(client, username) {
 		//Return perms if it exists, else return no
 		if (user.perms) return user.perms;
 		else return Perm.none;
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function getUser(client, username) {
@@ -122,10 +130,52 @@ async function getUser(client, username) {
 		var user = JSON.parse(await client.get(username));
 
 		//Blank out password
-		if (user.password) user.password = null;
+		if (user.password) delete user.password;
 
 		return user;
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getAllUser(client) {
+	console.log("Get all user...");
+
+	try {
+		//Select the db
+		await client.select(user_db);
+
+		//Retrieve all keys
+		const keys = await client.keys("*");
+
+		if (!keys) return [];
+
+		try {
+			//Convert keys to users
+			var users = await Promise.all(
+				keys.map(async (key) => {
+					const d = await client.get(key);
+					return d;
+				})
+			);
+			
+			//Convert to json and delete all passwords
+			return users.map((x) => {
+				var json = JSON.parse(x);
+
+				//Blank out password
+				if (json.password) delete json.password;
+
+				return json;
+			});
+		} catch (error) {
+			console.log(error);
+		}
+
+		return [];
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function createDefi(client, user, pass, name, id, description, points) {
@@ -153,7 +203,9 @@ async function createDefi(client, user, pass, name, id, description, points) {
 				points: points,
 			})
 		);
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function deleteDefi(client, user, pass, id) {
@@ -173,7 +225,9 @@ async function deleteDefi(client, user, pass, id) {
 
 		//Delete
 		return await client.del(id);
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function listDefi(client) {
@@ -190,15 +244,21 @@ async function listDefi(client) {
 
 		try {
 			//Convert keys to defis
-			var defis = await Promise.all(keys.map(async (key) => {
-				const d = await client.get(key);
-				return d;
-			}));
+			var defis = await Promise.all(
+				keys.map(async (key) => {
+					const d = await client.get(key);
+					return d;
+				})
+			);
 			return defis.map((x) => JSON.parse(x));
-		} catch (error) {console.log(error)}
+		} catch (error) {
+			console.log(error);
+		}
 
 		return [];
-	} catch (error) {console.log(error)}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 module.exports = {
@@ -211,5 +271,5 @@ module.exports = {
 	listDefi,
 	user_db,
 	defis_db,
-	Perm
+	Perm,
 };
