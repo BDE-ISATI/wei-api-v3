@@ -191,6 +191,7 @@ async function listDefi(client) {
 		try {
 			//Convert keys to defis
 			const defis = keys.map(async (x) => await client.get(x));
+			console.log(defis);
 			return await defis.map((x) => JSON.parse(x));
 		} catch (error) {console.log(error)}
 
