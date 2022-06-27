@@ -29,9 +29,9 @@ async function createUser(
 			const isAuth = await authUser(client, user, pass);
 			if (!isAuth) return false;
 
-			//Get the perms. It must be greater than Perm.player
+			//Get the perms. It must be greater than Perm.manager
 			const userperms = await getPermsUser(client, user);
-			if (userperms < Perm.manager && userperms < perms) return false;
+			if (userperms < Perm.manager || userperms < perms) return false;
 		}
 
 		//Select the db
