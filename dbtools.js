@@ -133,8 +133,17 @@ async function getUser(client, username) {
 		//Select the db
 		await client.select(user_db);
 
+		var user = await client.get(username);
+
+		if (!user) return {
+			username: "",
+			password: "",
+			nickname: "",
+			perms: Perm.none
+		};
+
 		//Retrieve user data
-		var user = JSON.parse(await client.get(username));
+		user = JSON.parse();
 
 		//Blank out password
 		if (user.password) user.password = "";
@@ -142,6 +151,14 @@ async function getUser(client, username) {
 		return user;
 	} catch (error) {
 		console.log(error);
+
+		//We return a blank user if nothing worked.
+		return {
+			username: "",
+			password: "",
+			nickname: "",
+			perms: Perm.none
+		};
 	}
 }
 
@@ -165,7 +182,7 @@ async function getAllUser(client) {
 					return d;
 				})
 			);
-			
+
 			//Convert to json and delete all passwords
 			return users.map((x) => {
 				var json = JSON.parse(x);
