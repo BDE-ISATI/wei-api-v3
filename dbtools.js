@@ -24,6 +24,7 @@ async function createUser(
 ) {
 	console.log("Creating user...");
 	try {
+		//Skip the auth phase is no admin is found
 		if (await client.exists("admin")) {
 			//The user must be connected
 			const isAuth = await authUser(client, user, pass);

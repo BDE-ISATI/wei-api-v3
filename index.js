@@ -39,9 +39,11 @@ initRedis();
 const server = http.createServer(function (request, response) {
 	console.dir(request.param);
 
+	//On request from client
 	if (request.method == "POST") {
 		console.log("POST");
 
+		//Data
 		var body = "";
 
 		request.on("data", function (data) {
@@ -51,17 +53,18 @@ const server = http.createServer(function (request, response) {
 		request.on("end", async function () {
 			console.log("Parsing: " + body);
 
-			var bodyJson = JSON.parse(body);
+			//Parse data
+			body = JSON.parse(body);
 
 			var answer = {};
 
-			if (bodyJson.type) {
-				switch (bodyJson.type) {
+			if (body.type) {
+				switch (body.type) {
 					case RequestType.GetUserAuth:
 						var auth = await db.authUser(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass
+							body.username,
+							body.password
 						);
 
 						answer = { auth: auth };
@@ -69,8 +72,7 @@ const server = http.createServer(function (request, response) {
 					case RequestType.GetUserPerm:
 						var user = await db.getUser(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass
+							body.username
 						);
 
 						answer = { perms: user.perms };
@@ -78,8 +80,7 @@ const server = http.createServer(function (request, response) {
 					case RequestType.GetUser:
 						var user = await db.getUser(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass
+							body.username
 						);
 
 						answer = { user: user };
@@ -94,12 +95,12 @@ const server = http.createServer(function (request, response) {
 					case RequestType.CreateUser:
 						var result = await db.createUser(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass,
-							bodyJson.data.username,
-							bodyJson.data.nickname,
-							bodyJson.data.perms,
-							bodyJson.data.password
+							body.username,
+							body.password,
+							body.usernamename,
+							body.data.nickname,
+							body.data.perms,
+							body.passwordword
 						);
 
 						answer = { result: result };
@@ -107,9 +108,9 @@ const server = http.createServer(function (request, response) {
 					case RequestType.DeleteUser:
 						var result = await db.deleteUser(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass,
-							bodyJson.data.username
+							body.username,
+							body.password,
+							body.usernamename
 						);
 
 						answer = { result: result };
@@ -121,12 +122,12 @@ const server = http.createServer(function (request, response) {
 					case RequestType.CreateDefi:
 						var result = await db.createDefi(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass,
-							bodyJson.data.name,
-							bodyJson.data.id,
-							bodyJson.data.description,
-							bodyJson.data.points
+							body.username,
+							body.password,
+							body.data.name,
+							body.data.id,
+							body.data.description,
+							body.data.points
 						);
 
 						answer = { result: result };
@@ -134,9 +135,9 @@ const server = http.createServer(function (request, response) {
 					case RequestType.DeleteDefi:
 						var result = await db.deleteDefi(
 							client,
-							bodyJson.data.user,
-							bodyJson.data.pass,
-							bodyJson.data.id
+							body.username,
+							body.password,
+							body.data.id
 						);
 
 						answer = { result: result };
