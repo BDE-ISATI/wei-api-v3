@@ -143,7 +143,7 @@ async function getUser(client, username) {
 		};
 
 		//Retrieve user data
-		user = JSON.parse();
+		user = JSON.parse(user);
 
 		//Blank out password
 		if (user.password) user.password = "";
