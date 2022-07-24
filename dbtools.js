@@ -207,6 +207,8 @@ async function createDefi(client, user, pass, name, id, description, points) {
 	} catch (error) {
 		console.log(error);
 	}
+
+	return false;
 }
 
 async function deleteDefi(client, user, pass, id) {
