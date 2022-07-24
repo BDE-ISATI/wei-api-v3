@@ -23,6 +23,12 @@ async function createUser(
 	password
 ) {
 	console.log("Creating user...");
+	console.log({
+		nickname: nickname,
+		perms: perms,
+		password: password,
+		points: 0,
+	});
 	try {
 		//Skip the auth phase is no admin is found
 		if (await client.exists("admin")) {

@@ -97,10 +97,10 @@ const server = http.createServer(function (request, response) {
 							client,
 							body.username,
 							body.password,
-							body.usernamename,
+							body.data.username,
 							body.data.nickname,
 							body.data.perms,
-							body.passwordword
+							body.data.password
 						);
 
 						answer = { result: result };
@@ -110,7 +110,7 @@ const server = http.createServer(function (request, response) {
 							client,
 							body.username,
 							body.password,
-							body.usernamename
+							body.data.username
 						);
 
 						answer = { result: result };
