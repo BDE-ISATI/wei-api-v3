@@ -59,6 +59,7 @@ async function createUser(
 		);
 	} catch (error) {
 		console.log(error);
+		return false;
 	}
 }
 
@@ -75,6 +76,7 @@ async function deleteUser(client, user, pass, usernametodel) {
 
 		//Check permissions
 		const userperms = await getPermsUser(client, user);
+		//This bugs out if the user doesn't exists. It's not really userfull to fix it so I left it out.
 		const minperms = await getPermsUser(client, usernametodel);
 		if (userperms < Perm.manager && userperms <= minperms) return false;
 
@@ -84,6 +86,7 @@ async function deleteUser(client, user, pass, usernametodel) {
 		return await client.del(usernametodel);
 	} catch (error) {
 		console.log(error);
+		return false;
 	}
 }
 
@@ -105,6 +108,7 @@ async function authUser(client, username, password) {
 		else return true;
 	} catch (error) {
 		console.log(error);
+		return false;
 	}
 }
 
@@ -123,6 +127,7 @@ async function getPermsUser(client, username) {
 		else return Perm.none;
 	} catch (error) {
 		console.log(error);
+		return Perm.none;
 	}
 }
 
@@ -199,6 +204,7 @@ async function getAllUser(client) {
 		return [];
 	} catch (error) {
 		console.log(error);
+		return [];
 	}
 }
 
@@ -229,9 +235,8 @@ async function createDefi(client, user, pass, name, id, description, points) {
 		);
 	} catch (error) {
 		console.log(error);
+		return false;
 	}
-
-	return false;
 }
 
 async function deleteDefi(client, user, pass, id) {
@@ -253,6 +258,7 @@ async function deleteDefi(client, user, pass, id) {
 		return await client.del(id);
 	} catch (error) {
 		console.log(error);
+		return false;
 	}
 }
 
@@ -284,6 +290,7 @@ async function listDefi(client) {
 		return [];
 	} catch (error) {
 		console.log(error);
+		return [];
 	}
 }
 
