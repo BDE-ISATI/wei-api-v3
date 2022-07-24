@@ -137,7 +137,7 @@ async function getUser(client, username) {
 		var user = JSON.parse(await client.get(username));
 
 		//Blank out password
-		if (user.password) delete user.password;
+		if (user.password) user.password = "";
 
 		return user;
 	} catch (error) {

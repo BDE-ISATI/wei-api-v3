@@ -24,7 +24,6 @@ const RequestType = {
 
 //Redis stuff
 const redis = require("redis");
-const { Console } = require("console");
 const client = redis.createClient({ url: process.env.REDIS_URL });
 
 client.on("error", (err) => console.log("Redis Client Error", err));
@@ -41,8 +40,6 @@ const server = http.createServer(function (request, response) {
 
 	//On request from client
 	if (request.method == "POST") {
-		console.log("POST");
-
 		//Data
 		var body = "";
 
@@ -51,10 +48,9 @@ const server = http.createServer(function (request, response) {
 		});
 
 		request.on("end", async function () {
-			console.log("Parsing: " + body);
-
 			//Parse data
 			body = JSON.parse(body);
+			console.log(body);
 
 			var answer = {};
 
