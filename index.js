@@ -143,8 +143,8 @@ const server = http.createServer(function (request, response) {
 								client,
 								body.username,
 								body.password,
-								body.data.defi.username,
-								body.data.player
+								body.data.defi.id,
+								body.data.player.username
 							);
 
 							answer = { success: success };
