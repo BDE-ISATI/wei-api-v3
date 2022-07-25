@@ -297,6 +297,14 @@ async function listDefi(client) {
 	}
 }
 
+async function getDefi(client, defiId) {
+	//Select defi db
+	await client.select(defis_db);
+
+	const d = await client.get(defiId);
+	return json.parse(d);
+}
+
 async function validateDefi(client, user, pass, defiId, playerId) {
 	console.log("Validating defi...");
 
@@ -309,19 +317,26 @@ async function validateDefi(client, user, pass, defiId, playerId) {
 		const perms = await getPermsUser(client, user);
 		if (perms < Perm.manager) return false;
 
-		//Select defi db
+		//DEFI PART
+		//Select the db
 		await client.select(defis_db);
 
-		const points = (await client.get(defiId)).points;
+		//Get the defi
+		const defi = await client.getDefi(client, defiId);
 
-		console.log("Adding " + points + " to player " + playerId);
+
+		//USER PART
+		//Select user db
+		await client.select(user_db);
+
+		console.log("Adding " + defi.points + " to player " + playerId);
 
 		const player = await getUser(client, playerId);
 
 		//Add points to player
 		await client.set(playerId, JSON.stringify({
 			...player,
-			points: player.points + points
+			points: player.points + defi.points
 		}));
 
 		return true;
