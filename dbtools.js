@@ -322,7 +322,7 @@ async function validateDefi(client, user, pass, defiId, playerId) {
 		await client.select(defis_db);
 
 		//Get the defi
-		const defi = await client.getDefi(client, defiId);
+		const defi = await getDefi(client, defiId);
 
 
 		//USER PART
