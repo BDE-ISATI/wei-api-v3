@@ -296,6 +296,40 @@ async function listDefi(client) {
 	}
 }
 
+async function validateDefi(client, user, pass, defiId, playerId) {
+	console.log("Validating defi...");
+
+	try {
+		//The user must be connected
+		const isAuth = await authUser(client, user, pass);
+		if (!isAuth) return false;
+
+		//Get the perms. It must be greater than Perm.player
+		const perms = await getPermsUser(client, user);
+		if (perms < Perm.manager) return false;
+
+		//Select defi db
+		await client.select(defis_db);
+
+		const points = (await client.get(defiId)).points;
+
+		console.log("Adding " + points + " to player " + playerId);
+
+		const player = await getPlayer(client, playerId);
+
+		//Add points to player
+		await client.set(playerId, JSON.stringify({
+			...player,
+			points: player.points + points
+		}));
+
+		return true;
+	} catch (error) {
+		console.log(error);
+		return false;
+	}
+}
+
 module.exports = {
 	createUser,
 	deleteUser,
@@ -305,6 +339,7 @@ module.exports = {
 	createDefi,
 	deleteDefi,
 	listDefi,
+	validateDefi,
 	user_db,
 	defis_db,
 	Perm,

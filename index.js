@@ -53,96 +53,109 @@ const server = http.createServer(function (request, response) {
 			console.log(body);
 
 			var answer = {};
+			try {
+				if (body.type) {
+					switch (body.type) {
+						case RequestType.GetUserAuth:
+							var auth = await db.authUser(
+								client,
+								body.username,
+								body.password
+							);
 
-			if (body.type) {
-				switch (body.type) {
-					case RequestType.GetUserAuth:
-						var auth = await db.authUser(
-							client,
-							body.username,
-							body.password
-						);
+							answer = { auth: auth };
+							break;
+						case RequestType.GetUserPerm:
+							var user = await db.getUser(
+								client,
+								body.username
+							);
 
-						answer = { auth: auth };
-						break;
-					case RequestType.GetUserPerm:
-						var user = await db.getUser(
-							client,
-							body.username
-						);
+							answer = { perms: user.perms };
+							break;
+						case RequestType.GetUser:
+							var user = await db.getUser(
+								client,
+								body.username
+							);
 
-						answer = { perms: user.perms };
-						break;
-					case RequestType.GetUser:
-						var user = await db.getUser(
-							client,
-							body.username
-						);
+							answer = { user: user };
+							break;
+						case RequestType.GetAllUser:
+							var users = await db.getAllUser(
+								client
+							);
 
-						answer = { user: user };
-						break;
-					case RequestType.GetAllUser:
-						var users = await db.getAllUser(
-							client
-						);
+							answer = { users: users };
+							break;
+						case RequestType.CreateUser:
+							var success = await db.createUser(
+								client,
+								body.username,
+								body.password,
+								body.data.username,
+								body.data.nickname,
+								body.data.perms,
+								body.data.password
+							);
 
-						answer = { users: users };
-						break;
-					case RequestType.CreateUser:
-						var success = await db.createUser(
-							client,
-							body.username,
-							body.password,
-							body.data.username,
-							body.data.nickname,
-							body.data.perms,
-							body.data.password
-						);
+							answer = { success: success };
+							break;
+						case RequestType.DeleteUser:
+							var success = await db.deleteUser(
+								client,
+								body.username,
+								body.password,
+								body.data.username
+							);
 
-						answer = { success: success };
-						break;
-					case RequestType.DeleteUser:
-						var success = await db.deleteUser(
-							client,
-							body.username,
-							body.password,
-							body.data.username
-						);
+							answer = { success: success };
+							break;
+						case RequestType.GetDefi:
+							var defis = await db.listDefi(client);
+							answer = defis;
+							break;
+						case RequestType.CreateDefi:
+							var success = await db.createDefi(
+								client,
+								body.username,
+								body.password,
+								body.data.name,
+								body.data.id,
+								body.data.description,
+								body.data.points
+							);
 
-						answer = { success: success };
-						break;
-					case RequestType.GetDefi:
-						var defis = await db.listDefi(client);
-						answer = defis;
-						break;
-					case RequestType.CreateDefi:
-						var success = await db.createDefi(
-							client,
-							body.username,
-							body.password,
-							body.data.name,
-							body.data.id,
-							body.data.description,
-							body.data.points
-						);
+							answer = { success: success };
+							break;
+						case RequestType.DeleteDefi:
+							var success = await db.deleteDefi(
+								client,
+								body.username,
+								body.password,
+								body.data.id
+							);
 
-						answer = { success: success };
-						break;
-					case RequestType.DeleteDefi:
-						var success = await db.deleteDefi(
-							client,
-							body.username,
-							body.password,
-							body.data.id
-						);
+							answer = { success: success };
+							break;
+						case RequestType.ValidateDefi:
+							var success = await db.validateDefi(
+								client,
+								body.username,
+								body.password,
+								body.data.defi,
+								body.data.player
+							);
 
-						answer = { success: success };
-						break;
-					case RequestType.ValidateDefi:
-						break;
-					default:
-						break;
+							answer = { success: success };
+							break;
+							break;
+						default:
+							break;
+					}
 				}
+			} catch (error) {
+				console.log(error);
 			}
 
 			response.writeHead(200, { "Content-Type": "application/json" });
