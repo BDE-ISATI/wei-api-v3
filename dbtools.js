@@ -155,7 +155,7 @@ async function getUser(client, username) {
 
 		//Add username
 		user.username = username;
-		
+
 		return user;
 	} catch (error) {
 		console.log(error);
@@ -316,7 +316,7 @@ async function validateDefi(client, user, pass, defiId, playerId) {
 
 		console.log("Adding " + points + " to player " + playerId);
 
-		const player = await getPlayer(client, playerId);
+		const player = await getUser(client, playerId);
 
 		//Add points to player
 		await client.set(playerId, JSON.stringify({
