@@ -223,6 +223,8 @@ async function createDefi(client, user, pass, name, id, description, points) {
 		//Select the db
 		await client.select(defis_db);
 
+		if (await client.exists(id)) return false;
+
 		//Create the challenge. Returns false if not created (error or whatever)
 		return (await client.set(
 			id,
