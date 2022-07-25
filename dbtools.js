@@ -1,3 +1,22 @@
+/*
+	This file deploys all the data we need in order for the server to work.
+	IE: The admin account
+
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	DATABASE WILL BE CLEARED AFTER THIS
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	
+*/
+
+
+
+
+
+
 const user_db = 0;
 const defis_db = 1;
 

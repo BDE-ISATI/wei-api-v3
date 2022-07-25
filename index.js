@@ -28,11 +28,13 @@ const client = redis.createClient({ url: process.env.REDIS_URL });
 
 client.on("error", (err) => console.log("Redis Client Error", err));
 
+//We need the await, otherwise the server will start before redis is ready
 async function initRedis() {
 	console.log("Initiating redis");
 	await client.connect();
 }
 
+//Run the init
 initRedis();
 
 const server = http.createServer(function (request, response) {
@@ -43,6 +45,7 @@ const server = http.createServer(function (request, response) {
 		//Data
 		var body = "";
 
+		//Retrieve data
 		request.on("data", function (data) {
 			body += data;
 		});
@@ -54,7 +57,10 @@ const server = http.createServer(function (request, response) {
 
 			var answer = {};
 			try {
+				//Should not happen
 				if (body.type) {
+
+					//Change depending on what the client is requesting
 					switch (body.type) {
 						case RequestType.GetUserAuth:
 							var auth = await db.authUser(
