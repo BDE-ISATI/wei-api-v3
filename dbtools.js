@@ -153,6 +153,9 @@ async function getUser(client, username) {
 		//Blank out password
 		if (user.password) user.password = "";
 
+		//Add username
+		user.username = username;
+		
 		return user;
 	} catch (error) {
 		console.log(error);
@@ -190,7 +193,7 @@ async function getAllUser(client) {
 					if (json.password) json.password = "";
 
 					//Add id 
-					json.id = key;
+					json.username = key;
 	
 					return json;
 				})
