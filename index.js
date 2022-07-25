@@ -89,7 +89,7 @@ const server = http.createServer(function (request, response) {
 						answer = { users: users };
 						break;
 					case RequestType.CreateUser:
-						var result = await db.createUser(
+						var success = await db.createUser(
 							client,
 							body.username,
 							body.password,
@@ -99,24 +99,24 @@ const server = http.createServer(function (request, response) {
 							body.data.password
 						);
 
-						answer = { result: result };
+						answer = { success: success };
 						break;
 					case RequestType.DeleteUser:
-						var result = await db.deleteUser(
+						var success = await db.deleteUser(
 							client,
 							body.username,
 							body.password,
 							body.data.username
 						);
 
-						answer = { result: result };
+						answer = { success: success };
 						break;
 					case RequestType.GetDefi:
 						var defis = await db.listDefi(client);
 						answer = defis;
 						break;
 					case RequestType.CreateDefi:
-						var result = await db.createDefi(
+						var success = await db.createDefi(
 							client,
 							body.username,
 							body.password,
@@ -126,17 +126,17 @@ const server = http.createServer(function (request, response) {
 							body.data.points
 						);
 
-						answer = { result: result };
+						answer = { success: success };
 						break;
 					case RequestType.DeleteDefi:
-						var result = await db.deleteDefi(
+						var success = await db.deleteDefi(
 							client,
 							body.username,
 							body.password,
 							body.data.id
 						);
 
-						answer = { result: result };
+						answer = { success: success };
 						break;
 					case RequestType.ValidateDefi:
 						break;

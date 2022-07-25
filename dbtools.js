@@ -48,7 +48,7 @@ async function createUser(
 		if (await client.exists(username)) return false;
 
 		//Try creating
-		return await client.set(
+		return (await client.set(
 			username,
 			JSON.stringify({
 				nickname: nickname,
@@ -56,7 +56,7 @@ async function createUser(
 				password: password,
 				points: 0,
 			})
-		);
+		)) == 'OK';
 	} catch (error) {
 		console.log(error);
 		return false;
@@ -83,7 +83,7 @@ async function deleteUser(client, user, pass, usernametodel) {
 		//Select the db
 		await client.select(user_db);
 
-		return await client.del(usernametodel);
+		return (await client.del(usernametodel)) > 0;
 	} catch (error) {
 		console.log(error);
 		return false;
@@ -224,7 +224,7 @@ async function createDefi(client, user, pass, name, id, description, points) {
 		await client.select(defis_db);
 
 		//Create the challenge. Returns false if not created (error or whatever)
-		return await client.set(
+		return (await client.set(
 			id,
 			JSON.stringify({
 				name: name,
@@ -232,7 +232,7 @@ async function createDefi(client, user, pass, name, id, description, points) {
 				description: description,
 				points: points,
 			})
-		);
+		)) == 'OK';
 	} catch (error) {
 		console.log(error);
 		return false;
@@ -255,7 +255,7 @@ async function deleteDefi(client, user, pass, id) {
 		await client.select(defis_db);
 
 		//Delete
-		return await client.del(id);
+		return (await client.del(id)) > 0;
 	} catch (error) {
 		console.log(error);
 		return false;
