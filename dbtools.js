@@ -302,7 +302,7 @@ async function getDefi(client, defiId) {
 	await client.select(defis_db);
 
 	const d = await client.get(defiId);
-	return json.parse(d);
+	return JSON.parse(d);
 }
 
 async function validateDefi(client, user, pass, defiId, playerId) {
