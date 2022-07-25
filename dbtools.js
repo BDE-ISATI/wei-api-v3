@@ -181,22 +181,20 @@ async function getAllUser(client) {
 
 		try {
 			//Convert keys to users
-			var users = await Promise.all(
+			return await Promise.all(
 				keys.map(async (key) => {
 					const d = await client.get(key);
-					return d;
+					var json = JSON.parse(d);
+	
+					//Blank out password
+					if (json.password) json.password = "";
+
+					//Add id 
+					json.id = key;
+	
+					return json;
 				})
 			);
-
-			//Convert to json and delete all passwords
-			return users.map((x) => {
-				var json = JSON.parse(x);
-
-				//Blank out password
-				if (json.password) delete json.password;
-
-				return json;
-			});
 		} catch (error) {
 			console.log(error);
 		}

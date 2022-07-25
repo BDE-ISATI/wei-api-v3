@@ -143,7 +143,7 @@ const server = http.createServer(function (request, response) {
 								client,
 								body.username,
 								body.password,
-								body.data.defi,
+								body.data.defi.id,
 								body.data.player
 							);
 
