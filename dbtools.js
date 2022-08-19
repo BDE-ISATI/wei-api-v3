@@ -146,7 +146,7 @@ module.exports = {
 	createDefi,
 	deleteDefi,
 	getDefi,
-	user_db,
+	global_db,
 	defis_db,
 	Perm,
 };
