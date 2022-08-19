@@ -1,5 +1,6 @@
 const http = require("http");
 const db = require("./dbtools");
+const encryption = require("./encryption.js")
 
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || "0.0.0.0";
@@ -14,6 +15,7 @@ const RequestType = {
 	getAllDefi: "getAllDefi",
 	createDefi: "createDefi",
 	deleteDefi: "deleteDefi",
+	generateEncryptionKey: "generateEncryptionKey",
 };
 
 //Redis stuff
@@ -76,6 +78,9 @@ const server = http.createServer(function (request, response) {
 							break;
 						case RequestType.deleteDefi:
 							answer = await db.deleteDefi(client, body.token, body.data.deletedDefiId);
+							break;
+						case RequestType.generateEncryptionKey:
+							encryption.generateKeyPairs();
 							break;
 						default:
 							break;
