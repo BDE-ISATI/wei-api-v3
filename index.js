@@ -68,7 +68,7 @@ const server = http.createServer(function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							isAuth(body.data.password, body.data.key);
+							isAuth(body.password, body.key);
 							answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
 							break;
 						case RequestType.getAllDefi:
