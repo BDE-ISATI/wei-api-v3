@@ -98,7 +98,7 @@ async function getAllDefi(client) {
 
 	const defis_keys = await client.hGetAll(defiHashName);
 
-	const defis = defis_keys.map(x => {
+	const defis = defis_keys.map(async function (x) {
 		const defi = await getDefi(client, x);
 		return JSON.parse(x);
 	});
