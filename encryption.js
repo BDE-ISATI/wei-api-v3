@@ -29,10 +29,11 @@ async function generateKeyPairs() {
 
 function decrypt(message, key) {
     try {
+        const crypt = new Crypt();
         var privateKey = currentKeyPairs.find(x => x.publicKey == key).privateKey;
         //Remove the privateKey/publicKey pair from the array
 
-        var decrypted = Crypt.decrypt(privateKey, message);
+        var decrypted = crypt.decrypt(privateKey, message);
 
         return decrypted;
     } catch (error) {
