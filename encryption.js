@@ -20,6 +20,13 @@ function generateKeyPairs() {
         });
     });   
 
+    console.log("-------------------------------");
+    console.log("-------------------------------");
+    console.log("-------------------------------");
+    console.log("Public key: " + publicKey);
+    console.log("-------------------------------");
+    console.log("-------------------------------");
+    console.log("-------------------------------");
     return publicKey;
 }
 
