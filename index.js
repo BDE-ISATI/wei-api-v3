@@ -49,7 +49,7 @@ const server = http.createServer(function (request, response) {
 		request.on("end", async function () {
 			//Parse data
 			body = JSON.parse(body);
-			console.log(body);
+			//console.log(body);
 
 			var answer = {};
 			try {
