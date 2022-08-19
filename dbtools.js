@@ -91,7 +91,7 @@ async function validateChallenge(client, authToken, id, defiId) {
 
 		const res = await client.hSet(playerHashName, id, JSON.stringify(json));
 
-		return res == 1
+		return res == 0
 	}
 }
 
