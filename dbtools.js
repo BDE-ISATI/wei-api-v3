@@ -48,7 +48,12 @@ async function name(client) {
 async function getAllPlayers(client) {
 	await client.select(global_db);
 
-	const players = await client.hVals(playerHashName);
+	const players_keys = await client.hVals(playerHashName);
+
+	const players = players_keys.map(async function (x) {
+		const defi = await getDefi(client, x);
+		return JSON.parse(x);
+	});
 
 	return players;
 }
