@@ -9,7 +9,7 @@ async function generateKeyPairs() {
 
     var publicKey;
 
-    rsa.generateKeyPairAsync().then(keyPair => {
+    await rsa.generateKeyPairAsync().then(keyPair => {
         publicKey = keyPair.publicKey;
         var privateKey = keyPair.privateKey;
 
@@ -22,9 +22,9 @@ async function generateKeyPairs() {
         console.log("-------------------------------");
         console.log("-------------------------------");
         console.log("-------------------------------");
-        
-        return publicKey;
     }); 
+
+    return publicKey;
 }
 
 function decrypt(message, key) {
