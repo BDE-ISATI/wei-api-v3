@@ -68,7 +68,7 @@ const server = http.createServer(function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							isAuth(body.data.token);
+							isAuth(body.data.password, body.data.key);
 							answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
 							break;
 						case RequestType.getAllDefi:
@@ -100,8 +100,8 @@ const server = http.createServer(function (request, response) {
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
 
-function isAuth(token, key) {
-	const password = encryption.decrypt(token, key);
+function isAuth(password, key) {
+	const password = encryption.decrypt(password, key);
 
 	console.log(password);
 }

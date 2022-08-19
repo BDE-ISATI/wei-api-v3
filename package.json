@@ -11,7 +11,7 @@
   "author": "Edorion",
   "license": "ISC",
   "dependencies": {
-    "encrypt-rsa": "^2.0.1",
+    "hybrid-crypto-js": "^0.2.4",
     "redis": "^4.1.0"
   }
 }

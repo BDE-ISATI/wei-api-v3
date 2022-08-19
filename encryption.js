@@ -1,22 +1,34 @@
-const EncryptRsa = require('encrypt-rsa').default;
+var RSA = require('hybrid-crypto-js').RSA;
+var Crypt = require('hybrid-crypto-js').Crypt;
 
 
 var currentKeyPairs = [];
 
 function generateKeyPairs() {
-    const encryptRsa = new EncryptRsa();
-    //privateKey, publicKey
-    const pair = encryptRsa.createPrivateAndPublicKeys();
-    currentKeyPairs.push(pair);
-    return pair.publicKey;
+    const rsa = new RSA();
+
+    var publicKey;
+
+    rsa.generateKeyPair(function(keyPair) {
+        // Callback function receives new key pair as a first argument
+        publicKey = keyPair.publicKey;
+        var privateKey = keyPair.privateKey;
+
+        currentKeyPairs.push({
+            publicKey: publicKey,
+            privateKey: privateKey
+        });
+    });   
+
+    return publicKey;
 }
 
-function decrypt(encrypted, key) {
+function decrypt(message, key) {
     try {
-        const privateKey = currentKeyPairs.find(pair => pair.publicKey === key).privateKey;
-        const decrypt = encryptRsa.decrypt(encrypted, privateKey);
-        currentKeyPairs = currentKeyPairs.splice(currentKeyPairs.findIndex(pair => pair.publicKey === key), 1);
-        return decrypt;
+        var privateKey = currentKeyPairs.find(x => x.publicKey == key).privateKey;
+        var decrypted = Crypt.decrypt(privateKey, message);
+
+        return decrypted;
     } catch (error) {
         console.log(error);
         return "";
