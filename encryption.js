@@ -32,6 +32,8 @@ function decrypt(message, key) {
         const crypt = new Crypt();
         var privateKey = currentKeyPairs.find(x => x.publicKey == key).privateKey;
         //Remove the privateKey/publicKey pair from the array
+        const i = currentKeyPairs.findIndex(x => x.publicKey == key);
+        currentKeyPairs = currentKeyPairs.splice(i, 1);
 
         var decrypted = crypt.decrypt(privateKey, message);
 
