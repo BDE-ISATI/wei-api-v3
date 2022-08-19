@@ -1,3 +1,5 @@
+const subtle = new SubtleCrypto();
+
 const currentKeyPairs = [];
 
 const settings = {
@@ -8,7 +10,7 @@ const settings = {
 }
 
 function generateKeyPairs() {
-    SubtleCrypto.generateKey(settings, false, ["encrypt", "decrypt"]).then(keyPair => {
+    subtle.generateKey(settings, true, ["encrypt", "decrypt"]).then(keyPair => {
         console.log(keyPair);
     });
 }
