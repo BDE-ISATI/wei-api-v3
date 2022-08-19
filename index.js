@@ -62,22 +62,23 @@ const server = http.createServer(function (request, response) {
 							answer = await db.getAllPlayers(client);
 							break;
 						case RequestType.createPlayer:
-							answer = await db.createPlayer(client, body.token, body.data.createdUserId, body.data.createdUserUsername);
+							answer = await db.createPlayer(client, body.data.createdUserId, body.data.createdUserUsername);
 							break;
 						case RequestType.deletePlayer:
-							answer = await db.deletePlayer(client, body.token, body.data.deletedUserId);
+							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							answer = await db.validateChallenge(client, body.token, body.data.validatedUserId, body.data.validatedChallengeId);
+							isAuth(body.data.token);
+							answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
 							break;
 						case RequestType.getAllDefi:
 							answer = await db.getAllDefi(client);
 							break;
 						case RequestType.createDefi:
-							answer = await db.createDefi(client, body.token, body.data.createdDefiId, body.data.createdDefiName, body.data.createdDefiDescription, body.data.createdDefiPoints);
+							answer = await db.createDefi(client, body.data.createdDefiId, body.data.createdDefiName, body.data.createdDefiDescription, body.data.createdDefiPoints);
 							break;
 						case RequestType.deleteDefi:
-							answer = await db.deleteDefi(client, body.token, body.data.deletedDefiId);
+							answer = await db.deleteDefi(client, body.data.deletedDefiId);
 							break;
 						case RequestType.generateEncryptionKey:
 							answer = await encryption.generateKeyPairs();
@@ -98,3 +99,9 @@ const server = http.createServer(function (request, response) {
 
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
+
+function isAuth(token, key) {
+	const password = encryption.decrypt(token, key);
+
+	console.log(password);
+}

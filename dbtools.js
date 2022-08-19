@@ -55,7 +55,7 @@ async function getAllPlayers(client) {
 	return players;
 }
 
-async function createPlayer(client, authToken, id, name) {
+async function createPlayer(client, id, name) {
 	await client.select(global_db);
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
@@ -68,7 +68,7 @@ async function createPlayer(client, authToken, id, name) {
 	return player == 1;
 }
 
-async function deletePlayer(client, authToken, id) {
+async function deletePlayer(client, id) {
 	await client.select(global_db);
 
 	const player = await client.hDel(playerHashName, id);
@@ -76,7 +76,7 @@ async function deletePlayer(client, authToken, id) {
 	return player == 1;
 }
 
-async function validateChallenge(client, authToken, id, defiId) {
+async function validateChallenge(client, id, defiId) {
 	const defi = await getDefi(client, defiId);
 	await client.select(global_db);
 
@@ -105,7 +105,7 @@ async function getAllDefi(client) {
 	return defis;
 }
 
-async function createDefi(client, authToken, defiId, defiName, defiDescription, defiPoints) {
+async function createDefi(client, defiId, defiName, defiDescription, defiPoints) {
 	await client.select(defis_db);
 
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
@@ -118,7 +118,7 @@ async function createDefi(client, authToken, defiId, defiName, defiDescription, 
 	return defi == 1;
 }
 
-async function deleteDefi(client, authToken, defiId) {
+async function deleteDefi(client, defiId) {
 	await client.select(defis_db);
 
 	const defi = await client.hDel(defiHashName, defiId);
