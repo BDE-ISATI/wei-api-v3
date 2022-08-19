@@ -1,9 +1,15 @@
 /*
+	This file deploys all the data we need in order for the server to work.
+	IE: The admin account
 
-This file is used to first init the server
-
-We add the main user, then create some test challenges.
-
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	DATABASE WILL BE CLEARED AFTER THIS
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	/!\ WARNING /!\
+	
 */
 
 
@@ -22,21 +28,13 @@ async function initRedis() {
 
     await client.flushAll();
 
-    await db.createUser(client, "", "", "admin", "Théo", db.Perm.all, "test");
+	await db.createPlayer(client, "", "theo", "Théo");
+	await db.createPlayer(client, "", "bertrand", "Bertrand");
+	await db.createPlayer(client, "", "axel", "Axel");
 
-	/*await client.set("defis", "");
-
-	const value = await client.get("key");
-
-    console.log(value);
-
-    await client.del("key");*/
-
-    //await redis_tools.createDefi(client, "admin", "test", "Iroquoise", "iro", "Faire une iroquoise pendant un LI", 10);
-
-    const defis = await db.listDefi(client);
-
-    console.log(defis);
+	await db.createDefi(client, "", "defi1", "Description 1", 10);
+	await db.createDefi(client, "", "defi2", "Description 2", 20);
+	await db.createDefi(client, "", "defi3", "Description 3", 30);
 
     await client.disconnect();
 }

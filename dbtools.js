@@ -1,24 +1,28 @@
 /*
-	This file deploys all the data we need in order for the server to work.
-	IE: The admin account
+Global db stores all player data in a hash, one player = one field
+hash key : player
 
-	/!\ WARNING /!\
-	/!\ WARNING /!\
-	/!\ WARNING /!\
-	DATABASE WILL BE CLEARED AFTER THIS
-	/!\ WARNING /!\
-	/!\ WARNING /!\
-	/!\ WARNING /!\
-	
+id {
+	name,
+	id,
+	points,
+	challenges_done
+}
+
+defis db stores only challenges as strings
+
+id {
+	name,
+	id,
+	description,
+	points
+}
+
 */
-
-
-
-
-
-
-const user_db = 0;
-const defis_db = 1;
+const global_db = 0;
+const defis_db = 0;
+const playerHashName = "players";
+const defiHashName = "defis";
 
 //Users are in db 1 in a basic set. User set, exists and del
 //Challenges are stored in db 2, under hash defis. use hSet, hVals, hDel
@@ -32,349 +36,113 @@ const Perm = {
 
 const redis = require("redis");
 
-async function createUser(
-	client,
-	user,
-	pass,
-	username,
-	nickname,
-	perms,
-	password
-) {
-	console.log("Creating user...");
-	console.log({
-		nickname: nickname,
-		perms: perms,
-		password: password,
+//Example function
+/*
+MUST RETURN TRUE/FALSE
+async function name(client) {
+
+}
+
+*/
+
+async function getAllPlayers(client) {
+	await client.select(global_db);
+
+	const players = await client.hVals(playerHashName);
+
+	return players;
+}
+
+async function createPlayer(client, authToken, id, name) {
+	await client.select(global_db);
+
+	const player = await client.hSet(playerHashName, id, JSON.stringify({
+		name: name,
+		id: id,
 		points: 0,
-	});
-	try {
-		//Skip the auth phase is no admin is found
-		if (await client.exists("admin")) {
-			//The user must be connected
-			const isAuth = await authUser(client, user, pass);
-			if (!isAuth) return false;
+		challenges_done: []
+	}))
 
-			//Get the perms. It must be greater than Perm.manager
-			const userperms = await getPermsUser(client, user);
-			if (userperms < Perm.manager || userperms < perms) return false;
-		}
+	return player == 1;
+}
 
-		//Select the db
-		await client.select(user_db);
+async function deletePlayer(client, authToken, id) {
+	await client.select(global_db);
 
-		//If user already exists, leave
-		if (await client.exists(username)) return false;
+	const player = await client.hDel(playerHashName, id);
 
-		//Try creating
-		return (await client.set(
-			username,
-			JSON.stringify({
-				nickname: nickname,
-				perms: perms,
-				password: password,
-				points: 0,
-			})
-		)) == 'OK';
-	} catch (error) {
-		console.log(error);
+	return player == 1;
+}
+
+async function validateChallenge(client, authToken, id, defiId) {
+	const defi = await getDefi(client, defiId);
+	await client.select(global_db);
+
+	const player = await client.hGet(playerHashName, id);
+	const json = await JSON.parse(player);
+
+	if (json.challenges_done.includes(defi.id)) {
 		return false;
+	} else {
+		json.challenges_done.push(defi.id);
+		json.points = json.points + defi.points;
+
+		const res = await client.hSet(playerHashName, id, JSON.stringify(json));
+
+		return res == 1
 	}
 }
 
-async function deleteUser(client, user, pass, usernametodel) {
-	console.log("Deleting user...");
+async function getAllDefi(client) { 
+	await client.select(defi_db);
 
-	try {
-		//Lol
-		if (usernametodel == "admin") return false;
+	const defis_keys = await client.hGetAll(defiHashName);
 
-		//The user must be connected
-		const isAuth = await authUser(client, user, pass);
-		if (!isAuth) return false;
+	const defis = defis_keys.map(x => await JSON.parse(await getDefi(client, x)));
 
-		//Check permissions
-		const userperms = await getPermsUser(client, user);
-		//This bugs out if the user doesn't exists. It's not really userfull to fix it so I left it out.
-		const minperms = await getPermsUser(client, usernametodel);
-		if (userperms < Perm.manager && userperms <= minperms) return false;
-
-		//Select the db
-		await client.select(user_db);
-
-		return (await client.del(usernametodel)) > 0;
-	} catch (error) {
-		console.log(error);
-		return false;
-	}
+	return defis;
 }
 
-async function authUser(client, username, password) {
-	console.log("Auth user...");
+async function createDefi(client, authToken, defiId, defiName, defiDescription, defiPoints) {
+	await client.select(defi_db);
 
-	try {
-		//Select db
-		await client.select(user_db);
+	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
+		name: defiName,
+		id: defiId,
+		description: defiDescription,
+		points: defiPoints
+	}))
 
-		//Get user data
-		var user = JSON.parse(await client.get(username));
-
-		//If it doesn't exists, return not auth
-		if (!user) return false;
-
-		//If password doesn't match, no auth. Else it worked
-		if (user.password != password) return false;
-		else return true;
-	} catch (error) {
-		console.log(error);
-		return false;
-	}
+	return defi == 1;
 }
 
-async function getPermsUser(client, username) {
-	console.log("Checking user perms...");
+async function deleteDefi(client, authToken, defiId) {
+	await client.select(defi_db);
 
-	try {
-		//Select db
-		await client.select(user_db);
+	const defi = await client.hDel(defiHashName, defiId);
 
-		//Get user data
-		const user = JSON.parse(await client.get(username));
+	return defi == 1;
 
-		//Return perms if it exists, else return no
-		if (user.perms) return user.perms;
-		else return Perm.none;
-	} catch (error) {
-		console.log(error);
-		return Perm.none;
-	}
-}
-
-async function getUser(client, username) {
-	console.log("Get user...");
-
-	try {
-		//Select the db
-		await client.select(user_db);
-
-		var user = await client.get(username);
-
-		if (!user) return {
-			username: "",
-			password: "",
-			nickname: "",
-			perms: Perm.none
-		};
-
-		//Retrieve user data
-		user = JSON.parse(user);
-
-		//Blank out password
-		if (user.password) user.password = "";
-
-		//Add username
-		user.username = username;
-
-		return user;
-	} catch (error) {
-		console.log(error);
-
-		//We return a blank user if nothing worked.
-		return {
-			username: "",
-			password: "",
-			nickname: "",
-			perms: Perm.none
-		};
-	}
-}
-
-async function getAllUser(client) {
-	console.log("Get all user...");
-
-	try {
-		//Select the db
-		await client.select(user_db);
-
-		//Retrieve all keys
-		const keys = await client.keys("*");
-
-		if (!keys) return [];
-
-		try {
-			//Convert keys to users
-			return await Promise.all(
-				keys.map(async (key) => {
-					const d = await client.get(key);
-					var json = JSON.parse(d);
-	
-					//Blank out password
-					if (json.password) json.password = "";
-
-					//Add id 
-					json.username = key;
-	
-					return json;
-				})
-			);
-		} catch (error) {
-			console.log(error);
-		}
-
-		return [];
-	} catch (error) {
-		console.log(error);
-		return [];
-	}
-}
-
-async function createDefi(client, user, pass, name, id, description, points) {
-	console.log("Creating defi...");
-
-	try {
-		//The user must be connected
-		const isAuth = await authUser(client, user, pass);
-		if (!isAuth) return false;
-
-		//Get the perms. It must be greater than Perm.player
-		const perms = await getPermsUser(client, user);
-		if (perms < Perm.manager) return false;
-
-		//Select the db
-		await client.select(defis_db);
-
-		if (await client.exists(id)) return false;
-
-		//Create the challenge. Returns false if not created (error or whatever)
-		return (await client.set(
-			id,
-			JSON.stringify({
-				name: name,
-				id: id,
-				description: description,
-				points: points,
-			})
-		)) == 'OK';
-	} catch (error) {
-		console.log(error);
-		return false;
-	}
-}
-
-async function deleteDefi(client, user, pass, id) {
-	console.log("Deleting defi...");
-
-	try {
-		//The user must be connected
-		const isAuth = await authUser(client, user, pass);
-		if (!isAuth) return false;
-
-		//Get the perms. It must be greater than Perm.player
-		const perms = await getPermsUser(client, user);
-		if (perms < Perm.manager) return false;
-
-		//Select the db
-		await client.select(defis_db);
-
-		//Delete
-		return (await client.del(id)) > 0;
-	} catch (error) {
-		console.log(error);
-		return false;
-	}
-}
-
-async function listDefi(client) {
-	console.log("Listing defi...");
-
-	try {
-		//Select defi db
-		await client.select(defis_db);
-
-		//Retrieve all keys
-		const keys = await client.keys("*");
-
-		if (!keys) return [];
-
-		try {
-			//Convert keys to defis
-			var defis = await Promise.all(
-				keys.map(async (key) => {
-					const d = await client.get(key);
-					return d;
-				})
-			);
-			return defis.map((x) => JSON.parse(x));
-		} catch (error) {
-			console.log(error);
-		}
-
-		return [];
-	} catch (error) {
-		console.log(error);
-		return [];
-	}
 }
 
 async function getDefi(client, defiId) {
-	//Select defi db
-	await client.select(defis_db);
+	await client.select(defi_db);
 
-	const d = await client.get(defiId);
-	return JSON.parse(d);
+	return await JSON.parse(await client.hGet(defiHashName, defiId));
 }
 
-async function validateDefi(client, user, pass, defiId, playerId) {
-	console.log("Validating defi...");
-
-	try {
-		//The user must be connected
-		const isAuth = await authUser(client, user, pass);
-		if (!isAuth) return false;
-
-		//Get the perms. It must be greater than Perm.player
-		const perms = await getPermsUser(client, user);
-		if (perms < Perm.manager) return false;
-
-		//DEFI PART
-		//Select the db
-		await client.select(defis_db);
-
-		//Get the defi
-		const defi = await getDefi(client, defiId);
 
 
-		//USER PART
-		//Select user db
-		await client.select(user_db);
-
-		console.log("Adding " + defi.points + " to player " + playerId);
-
-		const player = await getUser(client, playerId);
-
-		//Add points to player
-		await client.set(playerId, JSON.stringify({
-			...player,
-			points: player.points + defi.points
-		}));
-
-		return true;
-	} catch (error) {
-		console.log(error);
-		return false;
-	}
-}
 
 module.exports = {
-	createUser,
-	deleteUser,
-	authUser,
-	getUser,
-	getAllUser,
+	getAllPlayers,
+	createPlayer,
+	deletePlayer,
+	validateChallenge,
+	getAllDefi,
 	createDefi,
 	deleteDefi,
-	listDefi,
-	validateDefi,
+	getDefi,
 	user_db,
 	defis_db,
 	Perm,

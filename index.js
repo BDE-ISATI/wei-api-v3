@@ -7,19 +7,13 @@ var host = process.env.HOST || "0.0.0.0";
 var port = process.env.PORT || 80;
 
 const RequestType = {
-	GetClassement: "classement",
-
-	GetUserAuth: "auth",
-	GetUserPerm: "permissions",
-	GetUser: "user",
-	GetAllUser: "getall_user",
-	CreateUser: "create_user",
-	DeleteUser: "delete_user",
-
-	GetDefi: "defis",
-	CreateDefi: "create_defi",
-	DeleteDefi: "delete_defi",
-	ValidateDefi: "validate_defi",
+	getAllPlayers: "getAllPlayers",
+	createPlayer: "createPlayer",
+	deletePlayer: "deletePlayer",
+	validateChallenge: "validateChallenge",
+	getAllDefi: "getAllDefi",
+	createDefi: "createDefi",
+	deleteDefi: "deleteDefi",
 };
 
 //Redis stuff
@@ -62,99 +56,26 @@ const server = http.createServer(function (request, response) {
 
 					//Change depending on what the client is requesting
 					switch (body.type) {
-						case RequestType.GetUserAuth:
-							var auth = await db.authUser(
-								client,
-								body.username,
-								body.password
-							);
-
-							answer = { auth: auth };
+						case RequestType.getAllPlayers:
+							answer = await db.getAllPlayers(client);
 							break;
-						case RequestType.GetUserPerm:
-							var user = await db.getUser(
-								client,
-								body.username
-							);
-
-							answer = { perms: user.perms };
+						case RequestType.createPlayer:
+							answer = await db.createPlayer(client, body.token, body.data.createdUserId, body.data.createdUserUsername);
 							break;
-						case RequestType.GetUser:
-							var user = await db.getUser(
-								client,
-								body.username
-							);
-
-							answer = { user: user };
+						case RequestType.deletePlayer:
+							answer = await db.deletePlayer(client, body.token, body.data.deletedUserId);
 							break;
-						case RequestType.GetAllUser:
-							var users = await db.getAllUser(
-								client
-							);
-
-							answer = { users: users };
+						case RequestType.validateChallenge:
+							answer = await db.validateChallenge(client, body.token, body.data.validatedUserId, body.data.validatedChallengeId);
 							break;
-						case RequestType.CreateUser:
-							var success = await db.createUser(
-								client,
-								body.username,
-								body.password,
-								body.data.username,
-								body.data.nickname,
-								body.data.perms,
-								body.data.password
-							);
-
-							answer = { success: success };
+						case RequestType.getAllDefi:
+							answer = await db.getAllDefi(client);
 							break;
-						case RequestType.DeleteUser:
-							var success = await db.deleteUser(
-								client,
-								body.username,
-								body.password,
-								body.data.username
-							);
-
-							answer = { success: success };
+						case RequestType.createDefi:
+							answer = await db.createDefi(client, body.token, body.data.createdDefiId, body.data.createdDefiName, body.data.createdDefiDescription, body.data.createdDefiPoints);
 							break;
-						case RequestType.GetDefi:
-							var defis = await db.listDefi(client);
-							answer = defis;
-							break;
-						case RequestType.CreateDefi:
-							var success = await db.createDefi(
-								client,
-								body.username,
-								body.password,
-								body.data.name,
-								body.data.id,
-								body.data.description,
-								body.data.points
-							);
-
-							answer = { success: success };
-							break;
-						case RequestType.DeleteDefi:
-							var success = await db.deleteDefi(
-								client,
-								body.username,
-								body.password,
-								body.data.id
-							);
-
-							answer = { success: success };
-							break;
-						case RequestType.ValidateDefi:
-							var success = await db.validateDefi(
-								client,
-								body.username,
-								body.password,
-								body.data.defi.id,
-								body.data.player.username
-							);
-
-							answer = { success: success };
-							break;
+						case RequestType.deleteDefi:
+							answer = await db.deleteDefi(client, body.token, body.data.deletedDefiId);
 							break;
 						default:
 							break;
