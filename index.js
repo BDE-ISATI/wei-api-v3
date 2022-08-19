@@ -101,7 +101,7 @@ server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
 
 function isAuth(password, key) {
-	const password = encryption.decrypt(password, key);
+	const password_decrypted = encryption.decrypt(password, key);
 
-	console.log(password);
+	console.log(password_decrypted);
 }
