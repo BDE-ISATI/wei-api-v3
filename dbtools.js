@@ -48,12 +48,9 @@ async function name(client) {
 async function getAllPlayers(client) {
 	await client.select(global_db);
 
-	const players_keys = await client.hVals(playerHashName);
+	const players_vals = await client.hVals(playerHashName);
 
-	const players = players_keys.map(async function (x) {
-		const defi = await getDefi(client, x);
-		return JSON.parse(x);
-	});
+	const players = players_vals.map(player => JSON.parse(player));
 
 	return players;
 }
@@ -101,12 +98,9 @@ async function validateChallenge(client, authToken, id, defiId) {
 async function getAllDefi(client) { 
 	await client.select(defis_db);
 
-	const defis_keys = await client.hGetAll(defiHashName);
+	const defis_keys = await client.hVals(defiHashName);
 
-	const defis = defis_keys.map(async function (x) {
-		const defi = await getDefi(client, x);
-		return JSON.parse(x);
-	});
+	const defis = defis_keys.map(defi => JSON.parse(defi));
 
 	return defis;
 }
