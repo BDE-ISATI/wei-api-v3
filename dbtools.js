@@ -94,7 +94,7 @@ async function validateChallenge(client, authToken, id, defiId) {
 }
 
 async function getAllDefi(client) { 
-	await client.select(defi_db);
+	await client.select(defis_db);
 
 	const defis_keys = await client.hGetAll(defiHashName);
 
@@ -107,7 +107,7 @@ async function getAllDefi(client) {
 }
 
 async function createDefi(client, authToken, defiId, defiName, defiDescription, defiPoints) {
-	await client.select(defi_db);
+	await client.select(defis_db);
 
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
@@ -120,7 +120,7 @@ async function createDefi(client, authToken, defiId, defiName, defiDescription, 
 }
 
 async function deleteDefi(client, authToken, defiId) {
-	await client.select(defi_db);
+	await client.select(defis_db);
 
 	const defi = await client.hDel(defiHashName, defiId);
 
@@ -129,7 +129,7 @@ async function deleteDefi(client, authToken, defiId) {
 }
 
 async function getDefi(client, defiId) {
-	await client.select(defi_db);
+	await client.select(defis_db);
 
 	return JSON.parse(await client.hGet(defiHashName, defiId));
 }
