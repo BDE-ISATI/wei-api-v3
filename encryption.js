@@ -4,12 +4,13 @@ var Crypt = require('hybrid-crypto-js').Crypt;
 
 var currentKeyPairs = [];
 
-function generateKeyPairs() {
+async function generateKeyPairs() {
     const rsa = new RSA();
 
     var publicKey;
 
-    rsa.generateKeyPair(function(keyPair) {
+    await rsa.generateKeyPair(function(keyPair) {
+        
         // Callback function receives new key pair as a first argument
         publicKey = keyPair.publicKey;
         var privateKey = keyPair.privateKey;
@@ -33,6 +34,8 @@ function generateKeyPairs() {
 function decrypt(message, key) {
     try {
         var privateKey = currentKeyPairs.find(x => x.publicKey == key).privateKey;
+        //Remove the privateKey/publicKey pair from the array
+
         var decrypted = Crypt.decrypt(privateKey, message);
 
         return decrypted;
