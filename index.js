@@ -80,7 +80,7 @@ const server = http.createServer(function (request, response) {
 							answer = await db.deleteDefi(client, body.token, body.data.deletedDefiId);
 							break;
 						case RequestType.generateEncryptionKey:
-							encryption.generateKeyPairs();
+							answer = await encryption.generateKeyPairs();
 							break;
 						default:
 							break;
