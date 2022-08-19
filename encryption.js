@@ -1,10 +1,10 @@
 const EncryptRsa = require('encrypt-rsa').default;
-const encryptRsa = new EncryptRsa();
 
 
 var currentKeyPairs = [];
 
 function generateKeyPairs() {
+    const encryptRsa = new EncryptRsa();
     //privateKey, publicKey
     const pair = encryptRsa.createPrivateAndPublicKeys();
     currentKeyPairs.push(pair);
