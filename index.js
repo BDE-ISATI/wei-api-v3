@@ -3,16 +3,12 @@ const db = require("./dbtools");
 const encryption = require("./encryption.js");
 const nodemailer = require('nodemailer');
 
-var Heroku = require('heroku-client');
-var heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
-heroku.get('/apps').then(apps => {
-	console.log(apps);
-})
-
 // Listen on a specific host via the HOST environment variable
-var host = process.env.HOST || "0.0.0.0";
+const host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
-var port = process.env.PORT || 80;
+const port = process.env.PORT || 80;
+
+const url = process.env.SERVER_URL;
 
 //
 //
@@ -98,7 +94,8 @@ const server = http.createServer(function (request, response) {
 
 							var mo = mailOptions;
 							mo.subject = "Défi à valider pour " + body.data.validatedUserId;
-							mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId;
+							mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId + "\n"
+								+ "Valider le défi: " + SERVER_URL + "/" + validationId;
 							transporter.sendMail(mailOptions, function (error, info) {
 								if (error) {
 									console.log(error);
