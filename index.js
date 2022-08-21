@@ -151,17 +151,22 @@ const server = http.createServer(async function (request, response) {
 		});
 	}
 
+
+
 	if (request.method == "GET") {
 		var answer = "";
 
 		var validationId = decodeURI(request.url.replace("/", ""));
 
+		console.log("received validationId: " + request.url.replace("/", "") + "(decoded: " + validationId + ")");
+
+		//On extrait les parties de l'id qui sont nécessaires au opérations
+		const parts = await validationId.split(":");
+
 		//Demande de validation de défi
 		if (validationId.startsWith("defi:")) {
 			const validationRequests = await db.tryValidation(client, validationId);
 
-			//On extrait du validationId l'utilisateur et le défi à valider
-			const parts = await validationId.split(":");
 
 			if (validationRequests) {
 				const res = await db.validateChallenge(client, parts[2], parts[3]);
@@ -169,13 +174,10 @@ const server = http.createServer(async function (request, response) {
 				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
 			}
 
-			//Demande de validation de joueur
-		} else if (validationId.startsWith("user:")) {
+		} 
+		//Demande de validation de joueur
+		else if (validationId.startsWith("user:")) {
 			const validationRequests = await db.tryValidation(client, validationId);
-
-			//On extrait du validationId l'utilisateur à valider
-			const parts = await validationId.split(":");
-
 
 			if (validationRequests) {
 				const res = await db.createPlayer(client, parts[2], parts[3]);
@@ -190,6 +192,13 @@ const server = http.createServer(async function (request, response) {
 	}
 });
 
+
+
+
+
+//
+//
+// Server start
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
 
