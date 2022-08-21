@@ -77,7 +77,7 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.getAllPlayers(client);
 							break;
 						case RequestType.createPlayer:
-							var validationId = "user:" + makeId(5) + ":" + body.data.createdUserId + ":" + body.data.createdUserUsername;
+							var validationId = "user:" + makeId(5) + ":" + encodeURI(body.data.createdUserId) + ":" + encodeURI(body.data.createdUserUsername);
 
 							var res = await db.addPendingValidation(client, validationId);
 
@@ -106,7 +106,7 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							var validationId = "defi:" + makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
+							var validationId = "defi:" + makeId(5) + ":" + encodeURI(body.data.validatedUserId) + ":" + encodeURI(body.data.validatedChallengeId);
 
 							var res = await db.addPendingValidation(client, validationId);
 
@@ -154,7 +154,7 @@ const server = http.createServer(async function (request, response) {
 	if (request.method == "GET") {
 		var answer = "";
 
-		var validationId = request.url.replace("/", "");
+		var validationId = decodeURI(request.url.replace("/", ""));
 
 		//Demande de validation de défi
 		if (validationId.startsWith("defi:")) {
