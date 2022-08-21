@@ -41,7 +41,7 @@ var transporter = nodemailer.createTransport({
 
 const mailOptions = {
 	from: process.env.MAIL_LOGIN,
-	to: process.env.MAIL_ADMIN,
+	to: "",
 	subject: '',
 	text: ''
 };
@@ -84,18 +84,22 @@ const server = http.createServer(async function (request, response) {
 							if (res) {
 								var mo = mailOptions;
 								mo.subject = "Joueur à créer: " + body.data.createdUserId;
-								mo.text = "Joueur à créer: " + body.data.createdUserId + ", id: " + body.data.createdUserUsername + "\n"
+								mo.text = "Joueur à créer: " + body.data.createdUserUsername + ", id: " + body.data.createdUserId + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
-								transporter.sendMail(mailOptions, function (error, info) {
-									if (error) {
-										console.log(error);
-										answer = false;
-									} else {
-										console.log('Email sent: ' + info.response);
-										answer = true;
-									}
-								});
 
+								const admins = process.env.MAIL_ADMIN.split(";");
+								admins.forEach(mail => {
+									mo.to = mail;
+									transporter.sendMail(mailOptions, function (error, info) {
+										if (error) {
+											console.log(error);
+											answer = false;
+										} else {
+											console.log('Email sent: ' + info.response);
+											answer = true;
+										}
+									});
+								});
 							}
 							break;
 						case RequestType.deletePlayer:
@@ -165,7 +169,7 @@ const server = http.createServer(async function (request, response) {
 				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
 			}
 
-		//Demande de validation de joueur
+			//Demande de validation de joueur
 		} else if (validationId.startsWith("user:")) {
 			const validationRequests = await db.tryValidation(client, validationId);
 
