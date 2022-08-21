@@ -8,16 +8,7 @@ var host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 80;
 
-const RequestType = {
-	getAllPlayers: "getAllPlayers",
-	createPlayer: "createPlayer",
-	deletePlayer: "deletePlayer",
-	validateChallenge: "validateChallenge",
-	getAllDefi: "getAllDefi",
-	createDefi: "createDefi",
-	deleteDefi: "deleteDefi",
-	generateEncryptionKey: "generateEncryptionKey",
-};
+console.log(process.env);
 
 //
 //
@@ -99,6 +90,8 @@ const server = http.createServer(function (request, response) {
 							//if (isAuth(body.password, body.key))
 							//	answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
 
+							var validationId = makeid(5) + "%" + body.data.validatedUserId + "%" + body.data.validatedChallengeId;
+
 							var mo = mailOptions;
 							mo.subject = "Défi à valider pour " + body.data.validatedUserId;
 							mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId;
@@ -138,6 +131,8 @@ const server = http.createServer(function (request, response) {
 	if (request.method == "GET") {
 		console.log(request.url);
 
+		if (request.url.replace("/", "") == "") {
+
 		response.writeHead(200, { "Content-Type": "application/json" });
 		response.end(JSON.stringify("Hello World"));
 	}
@@ -151,3 +146,31 @@ function isAuth(password, key) {
 
 	return password_decrypted.message == process.env.ADMIN_PASSWORD;
 }
+
+
+
+//
+//
+// Utils
+function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
+
+
+const RequestType = {
+	getAllPlayers: "getAllPlayers",
+	createPlayer: "createPlayer",
+	deletePlayer: "deletePlayer",
+	validateChallenge: "validateChallenge",
+	getAllDefi: "getAllDefi",
+	createDefi: "createDefi",
+	deleteDefi: "deleteDefi",
+	generateEncryptionKey: "generateEncryptionKey",
+};
