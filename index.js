@@ -156,12 +156,11 @@ const server = http.createServer(async function (request, response) {
 	if (request.method == "GET") {
 		var answer = "";
 
-		var validationId = decodeURI(request.url.replace("/", ""));
-
-		console.log("received validationId: " + request.url.replace("/", "") + "(decoded: " + validationId + ")");
+		var validationId = request.url.replace("/", "");
 
 		//On extrait les parties de l'id qui sont nécessaires au opérations
-		const parts = await validationId.split(":");
+		//On utilise decodeURI pour récupérer les charactères spéciaux du pseudo
+		const parts = await decodeURI(validationId.split(":"));
 
 		//Demande de validation de défi
 		if (validationId.startsWith("defi:")) {
