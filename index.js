@@ -20,8 +20,8 @@ var transporter = nodemailer.createTransport({
 const mailOptions = {
 	from: process.env.MAIL_LOGIN,
 	to: 'cto@isati.org',
-	subject: 'Validating defi',
-	text: 'That was easy!'
+	subject: '',
+	text: ''
 };
 
 const RequestType = {
@@ -89,7 +89,7 @@ const server = http.createServer(function (request, response) {
 							//	answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
 
 							var mo = mailOptions;
-							mo.subject = "Validating défi for " + body.data.validatedUserId;
+							mo.subject = "Défi à valider pour " + body.data.validatedUserId;
 							mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId;
 							transporter.sendMail(mailOptions, function (error, info) {
 								if (error) {
@@ -122,6 +122,23 @@ const server = http.createServer(function (request, response) {
 			response.writeHead(200, { "Content-Type": "application/json" });
 			response.end(JSON.stringify(answer));
 		});
+	}
+
+	if (request.method == "GET") {
+		var body = "";
+
+		//Retrieve data
+		request.on("data", function (data) {
+			body += data;
+		});
+
+		
+		request.on("end", async function () { 
+			console.log(body);
+		});
+
+		response.writeHead(200, { "Content-Type": "application/json" });
+		response.end(JSON.stringify({ "message": "Hello World" }));
 	}
 });
 
