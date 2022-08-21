@@ -96,19 +96,7 @@ const server = http.createServer(async function (request, response) {
 								mo.text = "Joueur à créer: " + pseudo + ", id: " + id + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
 
-								const admins = process.env.MAIL_ADMIN.split(";");
-								admins.forEach(mail => {
-									mo.to = mail;
-									transporter.sendMail(mailOptions, function (error, info) {
-										if (error) {
-											console.log(error);
-											answer = false;
-										} else {
-											console.log('Email sent: ' + info.response);
-											answer = true;
-										}
-									});
-								});
+								sendMail(mo);
 							}
 							break;
 						case RequestType.deletePlayer:
@@ -131,15 +119,8 @@ const server = http.createServer(async function (request, response) {
 								mo.subject = "Défi à valider pour " + userId;
 								mo.text = "Défi à valider: " + challengeId + " pour " + userId + "\n"
 									+ "Valider le défi: " + server_url + "/" + validationId;
-								transporter.sendMail(mailOptions, function (error, info) {
-									if (error) {
-										console.log(error);
-										answer = false;
-									} else {
-										console.log('Email sent: ' + info.response);
-										answer = true;
-									}
-								});
+								
+								sendMail(mo);
 							}
 							break;
 						case RequestType.getAllDefi:
@@ -237,6 +218,22 @@ function makeId(length) {
 			charactersLength));
 	}
 	return result;
+}
+
+function sendMail(mailOptions) {
+	const admins = process.env.MAIL_ADMIN.split(";");
+	admins.forEach(mail => {
+		mo.to = mail;
+		transporter.sendMail(mailOptions, function (error, info) {
+			if (error) {
+				console.log(error);
+				answer = false;
+			} else {
+				console.log('Email sent: ' + info.response);
+				answer = true;
+			}
+		});
+	});
 }
 
 
