@@ -5,10 +5,9 @@ const nodemailer = require('nodemailer');
 
 var Heroku = require('heroku-client');
 var heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
-var app = heroku.apps(process.env.HEROKU_APP_NAME);
-app.domains().list(function (err, domains) {
-  console.log("Domains: " + domains);
-});
+heroku.get('/apps').then(apps => {
+	console.log(apps);
+})
 
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || "0.0.0.0";
@@ -136,7 +135,7 @@ const server = http.createServer(function (request, response) {
 	if (request.method == "GET") {
 		console.log(request.url);
 
-		if (request.url.replace("/", "") == "") {}
+		if (request.url.replace("/", "") == "") { }
 
 		response.writeHead(200, { "Content-Type": "application/json" });
 		response.end(JSON.stringify("Hello World"));
@@ -158,14 +157,14 @@ function isAuth(password, key) {
 //
 // Utils
 function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-      result += characters.charAt(Math.floor(Math.random() * 
- charactersLength));
-   }
-   return result;
+	var result = '';
+	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	var charactersLength = characters.length;
+	for (var i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() *
+			charactersLength));
+	}
+	return result;
 }
 
 
