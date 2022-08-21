@@ -85,7 +85,7 @@ const server = http.createServer(async function (request, response) {
 						case RequestType.validateChallenge:
 							const validationId = makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
 
-							const res = await addPendingValidation(client, validationId);
+							const res = await db.addPendingValidation(client, validationId);
 
 							if (res) {
 								var mo = mailOptions;
