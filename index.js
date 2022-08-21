@@ -50,9 +50,7 @@ const mailOptions = {
 //
 //
 // SERVER
-const server = http.createServer(function (request, response) {
-	console.dir(request.param);
-
+const server = http.createServer(async function (request, response) {
 	//On request from client
 	if (request.method == "POST") {
 		//Data
@@ -63,7 +61,7 @@ const server = http.createServer(function (request, response) {
 			body += data;
 		});
 
-		request.on("end", async function () {
+		request.on("end", function () {
 			//Parse data
 			body = JSON.parse(body);
 			//console.log(body);
@@ -125,8 +123,6 @@ const server = http.createServer(function (request, response) {
 	}
 
 	if (request.method == "GET") {
-		console.log(request.url);
-
 		var answer = "";
 
 		var validationId = request.url.replace("/", "");
