@@ -61,7 +61,7 @@ const server = http.createServer(async function (request, response) {
 			body += data;
 		});
 
-		request.on("end", function () {
+		request.on("end", async function () {
 			//Parse data
 			body = JSON.parse(body);
 			//console.log(body);
