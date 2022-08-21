@@ -8,6 +8,39 @@ var host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 80;
 
+const RequestType = {
+	getAllPlayers: "getAllPlayers",
+	createPlayer: "createPlayer",
+	deletePlayer: "deletePlayer",
+	validateChallenge: "validateChallenge",
+	getAllDefi: "getAllDefi",
+	createDefi: "createDefi",
+	deleteDefi: "deleteDefi",
+	generateEncryptionKey: "generateEncryptionKey",
+};
+
+//
+//
+//Redis stuff
+const redis = require("redis");
+const client = redis.createClient({ url: process.env.REDIS_URL });
+
+client.on("error", (err) => console.log("Redis Client Error", err));
+
+//We need the await, otherwise the server will start before redis is ready
+async function initRedis() {
+	console.log("Initiating redis");
+	await client.connect();
+}
+
+//Run the init
+initRedis();
+
+
+
+//
+//
+// MAIL AUTH
 //We need to send emails to the verification team
 var transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -24,32 +57,10 @@ const mailOptions = {
 	text: ''
 };
 
-const RequestType = {
-	getAllPlayers: "getAllPlayers",
-	createPlayer: "createPlayer",
-	deletePlayer: "deletePlayer",
-	validateChallenge: "validateChallenge",
-	getAllDefi: "getAllDefi",
-	createDefi: "createDefi",
-	deleteDefi: "deleteDefi",
-	generateEncryptionKey: "generateEncryptionKey",
-};
 
-//Redis stuff
-const redis = require("redis");
-const client = redis.createClient({ url: process.env.REDIS_URL });
-
-client.on("error", (err) => console.log("Redis Client Error", err));
-
-//We need the await, otherwise the server will start before redis is ready
-async function initRedis() {
-	console.log("Initiating redis");
-	await client.connect();
-}
-
-//Run the init
-initRedis();
-
+//
+//
+// SERVER
 const server = http.createServer(function (request, response) {
 	console.dir(request.param);
 
@@ -125,7 +136,7 @@ const server = http.createServer(function (request, response) {
 	}
 
 	if (request.method == "GET") {
-		console.log(request.headers);
+		console.log(request.url);
 
 		response.writeHead(200, { "Content-Type": "application/json" });
 		response.end(JSON.stringify("Hello World"));
