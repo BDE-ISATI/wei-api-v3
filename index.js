@@ -83,19 +83,24 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							var validationId = makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
+							const validationId = makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
 
-							var mo = mailOptions;
-							mo.subject = "Défi à valider pour " + body.data.validatedUserId;
-							mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId + "\n"
-								+ "Valider le défi: " + server_url + "/" + validationId;
-							transporter.sendMail(mailOptions, function (error, info) {
-								if (error) {
-									console.log(error);
-								} else {
-									console.log('Email sent: ' + info.response);
-								}
-							});
+							const res = await addPendingValidation(client, validationId);
+
+							if (res) {
+								var mo = mailOptions;
+								mo.subject = "Défi à valider pour " + body.data.validatedUserId;
+								mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId + "\n"
+									+ "Valider le défi: " + server_url + "/" + validationId;
+								transporter.sendMail(mailOptions, function (error, info) {
+									if (error) {
+										console.log(error);
+									} else {
+										console.log('Email sent: ' + info.response);
+									}
+								});
+
+							}
 							break;
 						case RequestType.getAllDefi:
 							answer = await db.getAllDefi(client);
@@ -126,16 +131,16 @@ const server = http.createServer(async function (request, response) {
 		var answer = "";
 
 		var validationId = request.url.replace("/", "");
-		if (validationId != "") { 			
+		if (validationId != "") {
 			const validationRequests = await db.tryValidation(client, validationId);
-			
+
 			//On extrait du validationId l'utilisateur et le défi à valider
-			const parts = validationId.split(":");
+			const parts = await validationId.split(":");
 
 			if (validationRequests) {
 				const res = await db.validateChallenge(client, parts[1], parts[2]);
 
-				answer = res ? "Défi validé" : "Défi non validé (déjà validé?)";
+				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
 			}
 		}
 
