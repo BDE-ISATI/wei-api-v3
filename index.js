@@ -83,7 +83,7 @@ const server = http.createServer(async function (request, response) {
 
 							if (res) {
 								var mo = mailOptions;
-								mo.subject = "Joueur à créer: " + body.data.createdUserId;
+								mo.subject = "Joueur à créer: " + body.data.createdUserUsername;
 								mo.text = "Joueur à créer: " + body.data.createdUserUsername + ", id: " + body.data.createdUserId + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
 
@@ -160,7 +160,7 @@ const server = http.createServer(async function (request, response) {
 
 		//On extrait les parties de l'id qui sont nécessaires au opérations
 		//On utilise decodeURI pour récupérer les charactères spéciaux du pseudo
-		const parts = await decodeURI(validationId.split(":"));
+		const parts = await decodeURI(validationId).split(":");
 
 		//Demande de validation de défi
 		if (validationId.startsWith("defi:")) {
