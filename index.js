@@ -3,12 +3,17 @@ const db = require("./dbtools");
 const encryption = require("./encryption.js");
 const nodemailer = require('nodemailer');
 
+var Heroku = require('heroku-client');
+var heroku = new Heroku({ token: process.env.HEROKU_API_TOKEN });
+var app = heroku.apps(process.env.HEROKU_APP_NAME);
+app.domains().list(function (err, domains) {
+  console.log("Domains: " + domains);
+});
+
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 80;
-
-console.log(process.env);
 
 //
 //
