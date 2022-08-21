@@ -77,18 +77,21 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.getAllPlayers(client);
 							break;
 						case RequestType.createPlayer:
-							var validationId = "user:" + makeId(5) + ":" + encodeURI(body.data.createdUserId) + ":" + encodeURI(body.data.createdUserUsername);
 
+							//We get the pseudo
+							var pseudo = body.data.createdUserUsername;
+							//Generate id server side
+							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+							
+							//Generate validationId used on the url to verify creation
+							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo);
+
+							//Add the current validation to the db so that it's not lost when server shuts down
 							var res = await db.addPendingValidation(client, validationId);
 
+							//If the creation was successful, send the mail to the admins
 							if (res) {
 								var mo = mailOptions;
-
-								var pseudo = body.data.createdUserUsername;
-								var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-
-
-
 								mo.subject = "Joueur à créer: " + pseudo;
 								mo.text = "Joueur à créer: " + pseudo + ", id: " + id + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
@@ -112,14 +115,21 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							var validationId = "defi:" + makeId(5) + ":" + encodeURI(body.data.validatedUserId) + ":" + encodeURI(body.data.validatedChallengeId);
+							//Get the ids
+							var userId = body.data.validatedUserId;
+							var challengeId = body.data.validatedChallengeId;
 
+							//Generate validationId used on the url to verify validation
+							var validationId = "defi:" + makeId(5) + ":" + encodeURI(userId) + ":" + encodeURI(challengeId);
+
+							//Add the current validation to the db so that it's not lost when server shuts down
 							var res = await db.addPendingValidation(client, validationId);
 
+							//If the creation was successful, send the mail to the admins
 							if (res) {
 								var mo = mailOptions;
-								mo.subject = "Défi à valider pour " + body.data.validatedUserId;
-								mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId + "\n"
+								mo.subject = "Défi à valider pour " + userId;
+								mo.text = "Défi à valider: " + challengeId + " pour " + userId + "\n"
 									+ "Valider le défi: " + server_url + "/" + validationId;
 								transporter.sendMail(mailOptions, function (error, info) {
 									if (error) {
