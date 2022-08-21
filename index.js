@@ -106,6 +106,7 @@ const server = http.createServer(async function (request, response) {
 							//Get the ids
 							var userId = body.data.validatedUserId;
 							var challengeId = body.data.validatedChallengeId;
+							var imageUrl = body.data.validatedChallengeImage;
 
 							//Generate validationId used on the url to verify validation
 							var validationId = "defi:" + makeId(5) + ":" + encodeURI(userId) + ":" + encodeURI(challengeId);
@@ -118,6 +119,7 @@ const server = http.createServer(async function (request, response) {
 								var mo = mailOptions;
 								mo.subject = "Défi à valider pour " + userId;
 								mo.text = "Défi à valider: " + challengeId + " pour " + userId + "\n"
+									+ "Preuve photo: " + imageUrl + "\n"
 									+ "Valider le défi: " + server_url + "/" + validationId;
 								
 								sendMail(mo);
