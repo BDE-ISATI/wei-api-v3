@@ -127,7 +127,7 @@ const server = http.createServer(async function (request, response) {
 
 		var validationId = request.url.replace("/", "");
 		if (validationId != "") { 			
-			const validationRequests = await db.tryValidation(validationId);
+			const validationRequests = await db.tryValidation(client, validationId);
 			
 			//On extrait du validationId l'utilisateur et le défi à valider
 			const parts = validationId.split(":");
