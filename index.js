@@ -141,7 +141,7 @@ const server = http.createServer(async function (request, response) {
 
 
 		await response.writeHead(200, { "Content-Type": "application/json" });
-		await response.end(JSON.stringify(validationRequests));
+		await response.end(JSON.stringify(answer));
 	}
 });
 
