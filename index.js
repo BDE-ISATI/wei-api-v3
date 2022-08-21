@@ -131,7 +131,7 @@ const server = http.createServer(function (request, response) {
 	if (request.method == "GET") {
 		console.log(request.url);
 
-		if (request.url.replace("/", "") == "") {
+		if (request.url.replace("/", "") == "") {}
 
 		response.writeHead(200, { "Content-Type": "application/json" });
 		response.end(JSON.stringify("Hello World"));
