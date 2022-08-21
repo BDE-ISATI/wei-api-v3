@@ -83,8 +83,14 @@ const server = http.createServer(async function (request, response) {
 
 							if (res) {
 								var mo = mailOptions;
-								mo.subject = "Joueur à créer: " + body.data.createdUserUsername;
-								mo.text = "Joueur à créer: " + body.data.createdUserUsername + ", id: " + body.data.createdUserId + "\n"
+
+								var pseudo = body.data.createdUserUsername;
+								var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+
+
+
+								mo.subject = "Joueur à créer: " + pseudo;
+								mo.text = "Joueur à créer: " + pseudo + ", id: " + id + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
 
 								const admins = process.env.MAIL_ADMIN.split(";");
