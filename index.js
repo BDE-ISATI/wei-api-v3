@@ -27,8 +27,6 @@ async function initRedis() {
 //Run the init
 initRedis();
 
-
-
 //
 //
 // MAIL AUTH
@@ -87,10 +85,7 @@ const server = http.createServer(function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							//if (isAuth(body.password, body.key))
-							//	answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
-
-							var validationId = makeid(5) + "%" + body.data.validatedUserId + "%" + body.data.validatedChallengeId;
+							var validationId = makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
 
 							var mo = mailOptions;
 							mo.subject = "Défi à valider pour " + body.data.validatedUserId;
@@ -132,10 +127,25 @@ const server = http.createServer(function (request, response) {
 	if (request.method == "GET") {
 		console.log(request.url);
 
-		if (request.url.replace("/", "") == "") { }
+		var answer = "";
 
-		response.writeHead(200, { "Content-Type": "application/json" });
-		response.end(JSON.stringify("Hello World"));
+		var validationId = request.url.replace("/", "");
+		if (validationId != "") { 			
+			const validationRequests = await db.tryValidation(validationId);
+			
+			//On extrait du validationId l'utilisateur et le défi à valider
+			const parts = validationId.split(":");
+
+			if (validationRequests) {
+				const res = await db.validateChallenge(client, parts[1], parts[2]);
+
+				answer = res ? "Défi validé" : "Défi non validé (déjà validé?)";
+			}
+		}
+
+
+		await response.writeHead(200, { "Content-Type": "application/json" });
+		await response.end(JSON.stringify(validationRequests));
 	}
 });
 
@@ -153,7 +163,7 @@ function isAuth(password, key) {
 //
 //
 // Utils
-function makeid(length) {
+function makeId(length) {
 	var result = '';
 	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	var charactersLength = characters.length;

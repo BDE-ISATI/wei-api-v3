@@ -23,6 +23,7 @@ const global_db = 0;
 const defis_db = 0;
 const playerHashName = "players";
 const defiHashName = "defis";
+const validationSetName = "toValidate";
 
 //Users are in db 1 in a basic set. User set, exists and del
 //Challenges are stored in db 2, under hash defis. use hSet, hVals, hDel
@@ -133,6 +134,22 @@ async function getDefi(client, defiId) {
 	return JSON.parse(await client.hGet(defiHashName, defiId));
 }
 
+async function addPendingValidation(client, validationId) {
+	await client.select(global_db);
+
+	const res = await client.sAdd(validationSetName, validationId);
+
+	return res == 1;
+}
+
+async function tryValidation(client, validationId) {
+	await client.select(global_db);
+
+	const res = await client.sRem(validationSetName, validationId);
+
+	return res == 1;
+}
+
 
 
 
@@ -145,6 +162,8 @@ module.exports = {
 	createDefi,
 	deleteDefi,
 	getDefi,
+	addPendingValidation,
+	tryValidation,
 	global_db,
 	defis_db,
 	Perm,
