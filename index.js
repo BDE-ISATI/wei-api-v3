@@ -133,12 +133,13 @@ const server = http.createServer(function (request, response) {
 		});
 
 		
-		request.on("end", async function () { 
+		request.on("end", function () { 
 			console.log(body);
+
+			response.writeHead(200, { "Content-Type": "application/json" });
+			response.end(JSON.stringify(body));
 		});
 
-		response.writeHead(200, { "Content-Type": "application/json" });
-		response.end(JSON.stringify({ "message": "Hello World" }));
 	}
 });
 
