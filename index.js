@@ -19,7 +19,7 @@ var transporter = nodemailer.createTransport({
 
 const mailOptions = {
 	from: process.env.MAIL_LOGIN,
-	to: 'cto@isati.org',
+	to: process.env.MAIL_ADMIN,
 	subject: '',
 	text: ''
 };
@@ -125,21 +125,10 @@ const server = http.createServer(function (request, response) {
 	}
 
 	if (request.method == "GET") {
-		var body = "";
+		console.log(request.headers);
 
-		//Retrieve data
-		request.on("data", function (data) {
-			body += data;
-		});
-
-		
-		request.on("end", function () { 
-			console.log(body);
-
-			response.writeHead(200, { "Content-Type": "application/json" });
-			response.end(JSON.stringify(body));
-		});
-
+		response.writeHead(200, { "Content-Type": "application/json" });
+		response.end(JSON.stringify("Hello World"));
 	}
 });
 
