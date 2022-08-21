@@ -223,7 +223,7 @@ function makeId(length) {
 function sendMail(mailOptions) {
 	const admins = process.env.MAIL_ADMIN.split(";");
 	admins.forEach(mail => {
-		mo.to = mail;
+		mailOptions.to = mail;
 		transporter.sendMail(mailOptions, function (error, info) {
 			if (error) {
 				console.log(error);
