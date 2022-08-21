@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "hybrid-crypto-js": "^0.2.4",
+    "nodemailer": "^6.7.8",
     "redis": "^4.1.0"
   }
 }

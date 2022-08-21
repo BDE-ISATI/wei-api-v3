@@ -1,11 +1,28 @@
 const http = require("http");
 const db = require("./dbtools");
-const encryption = require("./encryption.js")
+const encryption = require("./encryption.js");
+const nodemailer = require('nodemailer');
 
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 80;
+
+//We need to send emails to the verification team
+var transporter = nodemailer.createTransport({
+	service: 'gmail',
+	auth: {
+		user: process.env.MAIL_LOGIN,
+		pass: process.env.MAIL_PASSWORD
+	}
+});
+
+const mailOptions = {
+	from: process.env.MAIL_LOGIN,
+	to: 'cto@isati.org',
+	subject: 'Validating defi',
+	text: 'That was easy!'
+};
 
 const RequestType = {
 	getAllPlayers: "getAllPlayers",
@@ -68,8 +85,19 @@ const server = http.createServer(function (request, response) {
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							if (isAuth(body.password, body.key))
-								answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
+							//if (isAuth(body.password, body.key))
+							//	answer = await db.validateChallenge(client, body.data.validatedUserId, body.data.validatedChallengeId);
+
+							var mo = mailOptions;
+							mo.subject = "Validating défi for " + body.data.validatedUserId;
+							mo.text = "Défi à valider: " + body.data.validatedChallengeId + " pour " + body.data.validatedUserId;
+							transporter.sendMail(mailOptions, function (error, info) {
+								if (error) {
+									console.log(error);
+								} else {
+									console.log('Email sent: ' + info.response);
+								}
+							});
 							break;
 						case RequestType.getAllDefi:
 							answer = await db.getAllDefi(client);
