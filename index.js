@@ -77,15 +77,34 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.getAllPlayers(client);
 							break;
 						case RequestType.createPlayer:
-							answer = await db.createPlayer(client, body.data.createdUserId, body.data.createdUserUsername);
+							var validationId = "user:" + makeId(5) + ":" + body.data.createdUserId + ":" + body.data.createdUserUsername;
+
+							var res = await db.addPendingValidation(client, validationId);
+
+							if (res) {
+								var mo = mailOptions;
+								mo.subject = "Joueur à créer: " + body.data.createdUserId;
+								mo.text = "Joueur à créer: " + body.data.createdUserId + ", id: " + body.data.createdUserUsername + "\n"
+									+ "Créer le joueur: " + server_url + "/" + validationId;
+								transporter.sendMail(mailOptions, function (error, info) {
+									if (error) {
+										console.log(error);
+										answer = false;
+									} else {
+										console.log('Email sent: ' + info.response);
+										answer = true;
+									}
+								});
+
+							}
 							break;
 						case RequestType.deletePlayer:
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							const validationId = makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
+							var validationId = "defi:" + makeId(5) + ":" + body.data.validatedUserId + ":" + body.data.validatedChallengeId;
 
-							const res = await db.addPendingValidation(client, validationId);
+							var res = await db.addPendingValidation(client, validationId);
 
 							if (res) {
 								var mo = mailOptions;
@@ -95,11 +114,12 @@ const server = http.createServer(async function (request, response) {
 								transporter.sendMail(mailOptions, function (error, info) {
 									if (error) {
 										console.log(error);
+										answer = false;
 									} else {
 										console.log('Email sent: ' + info.response);
+										answer = true;
 									}
 								});
-
 							}
 							break;
 						case RequestType.getAllDefi:
@@ -131,16 +151,32 @@ const server = http.createServer(async function (request, response) {
 		var answer = "";
 
 		var validationId = request.url.replace("/", "");
-		if (validationId != "") {
+
+		//Demande de validation de défi
+		if (validationId.startsWith("defi:")) {
 			const validationRequests = await db.tryValidation(client, validationId);
 
 			//On extrait du validationId l'utilisateur et le défi à valider
 			const parts = await validationId.split(":");
 
 			if (validationRequests) {
-				const res = await db.validateChallenge(client, parts[1], parts[2]);
+				const res = await db.validateChallenge(client, parts[2], parts[3]);
 
 				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
+			}
+
+		//Demande de validation de joueur
+		} else if (validationId.startsWith("user:")) {
+			const validationRequests = await db.tryValidation(client, validationId);
+
+			//On extrait du validationId l'utilisateur à valider
+			const parts = await validationId.split(":");
+
+
+			if (validationRequests) {
+				const res = await db.createPlayer(client, parts[2], parts[3]);
+
+				answer = await res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
 			}
 		}
 
