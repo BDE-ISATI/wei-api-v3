@@ -28,9 +28,9 @@ async function initRedis() {
 
     await client.flushAll();
 
-	await db.createPlayer(client, "theo", "Théo");
-	await db.createPlayer(client, "bertrand", "Bertrand");
-	await db.createPlayer(client, "axel", "Axel");
+	await db.createPlayer(client, "theo", "Théo", "https://i.imgur.com/poJVcio.png");
+	await db.createPlayer(client, "bertrand", "Bertrand", "https://i.imgur.com/poJVcio.png");
+	await db.createPlayer(client, "axel", "Axel", "https://i.imgur.com/poJVcio.png");
 
 	await db.createDefi(client, "defi1", "Defi 1", "Description 1", 10);
 	await db.createDefi(client, "defi2", "Defi 2",  "Description 2", 20);

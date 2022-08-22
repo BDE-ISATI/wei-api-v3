@@ -56,14 +56,15 @@ async function getAllPlayers(client) {
 	return players;
 }
 
-async function createPlayer(client, id, name) {
+async function createPlayer(client, id, name, profilePictureUrl) {
 	await client.select(global_db);
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
 		name: name,
 		id: id,
 		points: 0,
-		challenges_done: []
+		challenges_done: [],
+		profilePictureUrl: profilePictureUrl
 	}))
 
 	return player == 1;

@@ -82,9 +82,14 @@ const server = http.createServer(async function (request, response) {
 							var pseudo = body.data.createdUserUsername;
 							//Generate id server side
 							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-							
+							var imageBase64 = body.data.createdUserProfilePicture;
+
+							var imageUrl = await uploadImage(imageBase64).replace(/https:\/\/i.imgur.com\//g, "");
+
+							if (!imageUrl) break;
+
 							//Generate validationId used on the url to verify creation
-							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo);
+							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo) + ":" + encodeURI(imageUrl);
 
 							//Add the current validation to the db so that it's not lost when server shuts down
 							var res = await db.addPendingValidation(client, validationId);
@@ -97,18 +102,21 @@ const server = http.createServer(async function (request, response) {
 									+ "Créer le joueur: " + server_url + "/" + validationId;
 
 								sendMail(mo);
+
+								answer = true;
 							}
+
 							break;
 						case RequestType.deletePlayer:
 							answer = await db.deletePlayer(client, body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
 							//Get the ids
-							const userId = body.data.validatedUserId;
-							const challengeId = body.data.validatedChallengeId;
-							const imageBase64 = body.data.validatedChallengeImage;
+							var userId = body.data.validatedUserId;
+							var challengeId = body.data.validatedChallengeId;
+							var imageBase64 = body.data.validatedChallengeImage;
 
-							const imageUrl = await uploadImage(imageBase64);
+							var imageUrl = await uploadImage(imageBase64);
 
 							if (!imageUrl) break;
 
@@ -125,8 +133,10 @@ const server = http.createServer(async function (request, response) {
 								mo.text = "Défi à valider: " + challengeId + " pour " + userId + "\n"
 									+ "Preuve photo: " + imageUrl + "\n"
 									+ "Valider le défi: " + server_url + "/" + validationId;
-								
+
 								sendMail(mo);
+
+								answer = true;
 							}
 							break;
 						case RequestType.getAllDefi:
@@ -176,13 +186,13 @@ const server = http.createServer(async function (request, response) {
 				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
 			}
 
-		} 
+		}
 		//Demande de validation de joueur
 		else if (validationId.startsWith("user:")) {
 			const validationRequests = await db.tryValidation(client, validationId);
 
 			if (validationRequests) {
-				const res = await db.createPlayer(client, parts[2], parts[3]);
+				const res = await db.createPlayer(client, parts[2], parts[3], "https://i.imgur.com/" + parts[4]);
 
 				answer = await res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
 			}
