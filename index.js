@@ -84,7 +84,7 @@ const server = http.createServer(async function (request, response) {
 							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
 							var imageBase64 = body.data.createdUserProfilePicture;
 
-							var imageUrl = await uploadImage(imageBase64).replace(/https:\/\/i.imgur.com\//g, "");
+							var imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, "");
 
 							if (!imageUrl) break;
 
