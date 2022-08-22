@@ -19,8 +19,6 @@ id {
 }
 
 */
-const global_db = 0;
-const defis_db = 0;
 const playerHashName = "players";
 const defiHashName = "defis";
 const validationSetName = "toValidate";
@@ -46,9 +44,11 @@ async function name(client) {
 
 */
 
+/**
+ * @param {*} client Redis client
+ * @returns a list of all players in the db (as json objects)
+ */
 async function getAllPlayers(client) {
-	await client.select(global_db);
-
 	const players_vals = await client.hVals(playerHashName);
 
 	const players = players_vals.map(player => JSON.parse(player));
@@ -56,10 +56,7 @@ async function getAllPlayers(client) {
 	return players;
 }
 
-async function createPlayer(client, id, name, profilePictureUrl) {
-	await client.select(global_db);
-
-	//Avoid overwriting player
+async function createPlayer(client, id, name, profilePictureUrl) {//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
@@ -74,8 +71,6 @@ async function createPlayer(client, id, name, profilePictureUrl) {
 }
 
 async function deletePlayer(client, id) {
-	await client.select(global_db);
-
 	const player = await client.hDel(playerHashName, id);
 
 	return player == 1;
@@ -83,7 +78,6 @@ async function deletePlayer(client, id) {
 
 async function validateChallenge(client, id, defiId) {
 	const defi = await getDefi(client, defiId);
-	await client.select(global_db);
 
 	const player = await client.hGet(playerHashName, id);
 	const json = JSON.parse(player);
@@ -100,9 +94,7 @@ async function validateChallenge(client, id, defiId) {
 	}
 }
 
-async function getAllDefi(client) { 
-	await client.select(defis_db);
-
+async function getAllDefi(client) {
 	const defis_keys = await client.hVals(defiHashName);
 
 	const defis = defis_keys.map(defi => JSON.parse(defi));
@@ -111,8 +103,6 @@ async function getAllDefi(client) {
 }
 
 async function createDefi(client, defiId, defiName, defiDescription, defiPoints) {
-	await client.select(defis_db);
-
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
@@ -124,8 +114,6 @@ async function createDefi(client, defiId, defiName, defiDescription, defiPoints)
 }
 
 async function deleteDefi(client, defiId) {
-	await client.select(defis_db);
-
 	const defi = await client.hDel(defiHashName, defiId);
 
 	return defi == 1;
@@ -133,25 +121,23 @@ async function deleteDefi(client, defiId) {
 }
 
 async function getDefi(client, defiId) {
-	await client.select(defis_db);
-
 	return JSON.parse(await client.hGet(defiHashName, defiId));
 }
 
 async function addPendingValidation(client, validationId) {
-	await client.select(global_db);
-
 	const res = await client.sAdd(validationSetName, validationId);
 
 	return res == 1;
 }
 
 async function tryValidation(client, validationId) {
-	await client.select(global_db);
-
 	const res = await client.sRem(validationSetName, validationId);
 
 	return res == 1;
+}
+
+async function addEvent(client, event) {
+	
 }
 
 
