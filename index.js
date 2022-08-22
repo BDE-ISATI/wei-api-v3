@@ -100,6 +100,7 @@ const server = http.createServer(async function (request, response) {
 								var mo = mailOptions;
 								mo.subject = "Joueur à créer: " + pseudo;
 								mo.text = "Joueur à créer: " + pseudo + ", id: " + id + "\n"
+									+ "Image: " + "https://i.imgur.com/" + imageUrl + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
 
 								sendMail(mo);
