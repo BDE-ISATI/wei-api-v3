@@ -19,6 +19,9 @@ const client = redis.createClient({ url: process.env.REDIS_URL });
 client.on("error", (err) => console.log("Redis Client Error", err));
 
 //We need the await, otherwise the server will start before redis is ready
+/**
+ * Initialization of redis
+ */
 async function initRedis() {
 	console.log("Initiating redis");
 	await client.connect();
@@ -83,8 +86,10 @@ const server = http.createServer(async function (request, response) {
 							var pseudo = body.data.createdUserUsername;
 							//Generate id server side
 							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+							//Image in base64
 							var imageBase64 = body.data.createdUserProfilePicture;
 
+							//Uploads the image to imgur
 							var imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, "");
 
 							if (!imageUrl) break;
@@ -116,8 +121,10 @@ const server = http.createServer(async function (request, response) {
 							//Get the ids
 							var userId = body.data.validatedUserId;
 							var challengeId = body.data.validatedChallengeId;
+							//Image in base64
 							var imageBase64 = body.data.validatedChallengeImage;
 
+							//Uploads the image to imgur
 							var imageUrl = await uploadImage(imageBase64);
 
 							if (!imageUrl) break;
@@ -217,17 +224,15 @@ const server = http.createServer(async function (request, response) {
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
 
-function isAuth(password, key) {
-	const password_decrypted = encryption.decrypt(password, key);
-
-	return password_decrypted.message == process.env.ADMIN_PASSWORD;
-}
-
-
 
 //
 //
 // Utils
+/**
+ * 
+ * @param {int} length 
+ * @returns a string of `length` random characters
+ */
 function makeId(length) {
 	var result = '';
 	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -239,6 +244,10 @@ function makeId(length) {
 	return result;
 }
 
+/**
+ * Sends an email to all admins
+ * @param {*} mailOptions mail options (see https://nodemailer.com/message/)
+ */
 function sendMail(mailOptions) {
 	const admins = process.env.MAIL_ADMIN.split(";");
 	admins.forEach(mail => {
@@ -255,6 +264,11 @@ function sendMail(mailOptions) {
 	});
 }
 
+
+/**
+ * Uploads image to imgur
+ * @param {string} imageBase64 a string representing a base64 image
+ */
 async function uploadImage(imageBase64) {
 	const headers = new Headers();
 	headers.append("Authorization", "Client-ID 0cab4834935cf6b");
@@ -287,6 +301,22 @@ async function uploadImage(imageBase64) {
 
 }
 
+/**
+ * Find the correct decoding key from `key` and uses it to decode then auth
+ * @param {string} password the encoded password
+ * @param {string} key the key used to encode
+ * @returns returns true if the decoded password is equal to `process.env.ADMIN_PASSWORD`
+ */
+function isAuth(password, key) {
+	const password_decrypted = encryption.decrypt(password, key);
+
+	return password_decrypted.message == process.env.ADMIN_PASSWORD;
+}
+
+
+//
+//
+// Enums
 
 const RequestType = {
 	getAllPlayers: "getAllPlayers",
