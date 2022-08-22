@@ -104,9 +104,13 @@ const server = http.createServer(async function (request, response) {
 							break;
 						case RequestType.validateChallenge:
 							//Get the ids
-							var userId = body.data.validatedUserId;
-							var challengeId = body.data.validatedChallengeId;
-							var imageUrl = body.data.validatedChallengeImage;
+							const userId = body.data.validatedUserId;
+							const challengeId = body.data.validatedChallengeId;
+							const imageBase64 = body.data.validatedChallengeImage;
+
+							const imageUrl = await uploadImage(imageBase64);
+
+							if (!imageUrl) break;
 
 							//Generate validationId used on the url to verify validation
 							var validationId = "defi:" + makeId(5) + ":" + encodeURI(userId) + ":" + encodeURI(challengeId);
@@ -236,6 +240,38 @@ function sendMail(mailOptions) {
 			}
 		});
 	});
+}
+
+async function uploadImage(imageBase64) {
+	const headers = new Headers();
+	headers.append("Authorization", "Client-ID 0cab4834935cf6b");
+
+	const formdata = new FormData();
+	formdata.append("image", imageBase64);
+	formdata.append("title", makeId(10));
+	formdata.append("description", "A challenge someone made during the WEI!");
+
+	const requestOptions = {
+		method: 'POST',
+		headers: headers,
+		body: formdata,
+		redirect: 'follow',
+		origin: "https://wei.isati.org",
+		referer: "https://wei.isati.org/"
+	};
+
+	// @ts-ignore
+	const res = await fetch("https://api.imgur.com/3/image", requestOptions)
+		.then(response => response.text())
+		.then(result => { return result })
+
+	const json = JSON.parse(res);
+	if (json.data.link) {
+		return json.data.link;
+	} else {
+		return false;
+	}
+
 }
 
 
