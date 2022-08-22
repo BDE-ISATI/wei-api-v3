@@ -51,7 +51,8 @@ const mailOptions = {
 //
 // SERVER
 const server = http.createServer(async function (request, response) {
-	//On request from client
+
+	//On request from client (these will always be post requests)
 	if (request.method == "POST") {
 		//Data
 		var body = "";
@@ -166,6 +167,7 @@ const server = http.createServer(async function (request, response) {
 
 
 
+	//Validation only (when accessings validation urls from the mail)
 	if (request.method == "GET") {
 		var answer = "";
 
