@@ -59,6 +59,9 @@ async function getAllPlayers(client) {
 async function createPlayer(client, id, name, profilePictureUrl) {
 	await client.select(global_db);
 
+	//Avoid overwriting player
+	if (await client.hGet(playerHashName, id) != null) return false;
+
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
 		name: name,
 		id: id,
