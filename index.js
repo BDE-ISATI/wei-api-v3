@@ -294,11 +294,16 @@ async function uploadImage(imageBase64) {
 		.then(result => { return result })
 
 	console.log(res);
-	const json = await JSON.parse(res);
-	if (json.data.link) {
-		return json.data.link;
-	} else {
-		return false;
+
+	try {
+		const json = await JSON.parse(res);
+		if (json.data.link) {
+			return json.data.link;
+		} else {
+			return false;
+		}
+	} catch (error) {
+		return "https://i.imgur.com/AJ3InNO.png";
 	}
 
 }
