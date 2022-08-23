@@ -25,6 +25,7 @@ client.on("error", (err) => console.log("Redis Client Error", err));
 async function initRedis() {
 	console.log("Initiating redis");
 	await client.connect();
+	await client.select(0);
 }
 
 //Run the init
