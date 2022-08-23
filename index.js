@@ -293,7 +293,8 @@ async function uploadImage(imageBase64) {
 		.then(response => response.text())
 		.then(result => { return result })
 
-	const json = JSON.parse(res);
+	console.log(res);
+	const json = await JSON.parse(res);
 	if (json.data.link) {
 		return json.data.link;
 	} else {
