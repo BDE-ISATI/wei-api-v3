@@ -293,7 +293,6 @@ async function uploadImage(imageBase64) {
 		.then(response => response.text())
 		.then(result => { return result })
 
-	console.log(res);
 
 	try {
 		const json = await JSON.parse(res);
