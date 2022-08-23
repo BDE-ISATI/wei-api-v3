@@ -154,7 +154,5 @@ module.exports = {
 	getDefi,
 	addPendingValidation,
 	tryValidation,
-	global_db,
-	defis_db,
 	Perm,
 };
