@@ -15,6 +15,7 @@ async function initSheetReader() {
 
 
 async function getChallenges() {
+    console.log("Reloading challenges");
 
     try {
         //Get all doc data
@@ -28,14 +29,15 @@ async function getChallenges() {
     
         //add all new challenges
         rows.forEach(row => {
-            console.log(`Loading challenge \n
-                                Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}`);
+            console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}, image: ${row.image}`);
     
-            db.createDefi(row.identifiant, row.nom, row.description, row.points);
+            db.createDefi(row.identifiant, row.nom, row.description, row.points, row.image);
         });
         
         return true;
     } catch (error) {
+        console.log("Error while loading challenges!");
+        console.log(error);
         return false;
     }
 }

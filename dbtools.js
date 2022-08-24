@@ -101,12 +101,13 @@ async function getAllDefi() {
 	return defis;
 }
 
-async function createDefi(defiId, defiName, defiDescription, defiPoints) {
+async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl) {
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
 		description: defiDescription,
-		points: defiPoints
+		points: defiPoints,
+		image: defiImageUrl
 	}))
 
 	return defi >= 1;

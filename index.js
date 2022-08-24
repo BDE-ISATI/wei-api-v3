@@ -111,7 +111,6 @@ const server = http.createServer(async function (request, response) {
 
 							break;
 						case RequestType.deletePlayer:
-							answer = await db.deletePlayer(body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
 							//Récupère les id
@@ -148,10 +147,8 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.getAllDefi();
 							break;
 						case RequestType.createDefi:
-							answer = await db.createDefi(body.data.createdDefiId, body.data.createdDefiName, body.data.createdDefiDescription, body.data.createdDefiPoints);
 							break;
 						case RequestType.deleteDefi:
-							answer = await db.deleteDefi(body.data.deletedDefiId);
 							break;
 						case RequestType.generateEncryptionKey:
 							answer = await encryption.generateKeyPairs();
@@ -209,8 +206,10 @@ const server = http.createServer(async function (request, response) {
 		}
 		//Rechargement des défis à partir du doc excel
 		else if (validationId.startsWith("reloadchallenges")) {
+			//On actualise les défis
 			const res = await googlesheet.getChallenges();
 
+			//Si erreur on le signale à l'admin
 			answer = res ? "Challenges rechargés" : "Erreur: contactez l'admin"
 		}
 
