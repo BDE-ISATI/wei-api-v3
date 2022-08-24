@@ -57,7 +57,7 @@ async function initRedis() {
  * @param {*} client Redis client
  * @returns a list of all players in the db (as json objects)
  */
-async function getAllPlayers(client) {
+async function getAllPlayers() {
 	const players_vals = await client.hVals(playerHashName);
 
 	const players = players_vals.map(player => JSON.parse(player));
@@ -103,7 +103,7 @@ async function validateChallenge(id, defiId) {
 	}
 }
 
-async function getAllDefi(client) {
+async function getAllDefi() {
 	const defis_keys = await client.hVals(defiHashName);
 
 	const defis = defis_keys.map(defi => JSON.parse(defi));
