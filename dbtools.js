@@ -35,14 +35,23 @@ const Perm = {
 
 const redis = require("redis");
 
-//Example function
-/*
-MUST RETURN TRUE/FALSE
-async function name(client) {
+//Our redis client
+var client;
 
+
+//We need the await, otherwise the server will start before redis is ready
+/**
+ * Initialization of redis
+ */
+async function initRedis() {
+	console.log("Initiating redis"); 
+	client = redis.createClient({ url: process.env.REDIS_URL });
+	client.on("error", (err) => console.log("Redis Client Error", err));
+	await client.connect();
+	await client.select(0);
 }
 
-*/
+
 
 /**
  * @param {*} client Redis client
@@ -56,7 +65,7 @@ async function getAllPlayers(client) {
 	return players;
 }
 
-async function createPlayer(client, id, name, profilePictureUrl) {//Avoid overwriting player
+async function createPlayer(id, name, profilePictureUrl) {//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
@@ -70,14 +79,14 @@ async function createPlayer(client, id, name, profilePictureUrl) {//Avoid overwr
 	return player == 1;
 }
 
-async function deletePlayer(client, id) {
+async function deletePlayer(id) {
 	const player = await client.hDel(playerHashName, id);
 
 	return player == 1;
 }
 
-async function validateChallenge(client, id, defiId) {
-	const defi = await getDefi(client, defiId);
+async function validateChallenge(id, defiId) {
+	const defi = await getDefi(defiId);
 
 	const player = await client.hGet(playerHashName, id);
 	const json = JSON.parse(player);
@@ -102,7 +111,7 @@ async function getAllDefi(client) {
 	return defis;
 }
 
-async function createDefi(client, defiId, defiName, defiDescription, defiPoints) {
+async function createDefi(defiId, defiName, defiDescription, defiPoints) {
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
@@ -113,30 +122,30 @@ async function createDefi(client, defiId, defiName, defiDescription, defiPoints)
 	return defi == 1;
 }
 
-async function deleteDefi(client, defiId) {
+async function deleteDefi(defiId) {
 	const defi = await client.hDel(defiHashName, defiId);
 
 	return defi == 1;
 
 }
 
-async function getDefi(client, defiId) {
+async function getDefi(defiId) {
 	return JSON.parse(await client.hGet(defiHashName, defiId));
 }
 
-async function addPendingValidation(client, validationId) {
+async function addPendingValidation(validationId) {
 	const res = await client.sAdd(validationSetName, validationId);
 
 	return res == 1;
 }
 
-async function tryValidation(client, validationId) {
+async function tryValidation(validationId) {
 	const res = await client.sRem(validationSetName, validationId);
 
 	return res == 1;
 }
 
-async function addEvent(client, event) {
+async function addEvent(event) {
 	
 }
 
@@ -144,6 +153,7 @@ async function addEvent(client, event) {
 
 
 module.exports = {
+	initRedis,
 	getAllPlayers,
 	createPlayer,
 	deletePlayer,

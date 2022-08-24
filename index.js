@@ -7,29 +7,19 @@ const nodemailer = require('nodemailer');
 const host = process.env.HOST || "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 const port = process.env.PORT || 80;
-
+//Server url so that we can generate validation urls
 const server_url = process.env.SERVER_URL;
 
-//
-//
-//Redis stuff
-const redis = require("redis");
-const client = redis.createClient({ url: process.env.REDIS_URL });
 
-client.on("error", (err) => console.log("Redis Client Error", err));
 
-//We need the await, otherwise the server will start before redis is ready
-/**
- * Initialization of redis
- */
-async function initRedis() {
-	console.log("Initiating redis");
-	await client.connect();
-	await client.select(0);
-}
 
-//Run the init
-initRedis();
+/*
+
+INITIALISATION
+*/
+
+db.initRedis();
+
 
 //
 //
@@ -43,6 +33,7 @@ var transporter = nodemailer.createTransport({
 	}
 });
 
+//Default mail options
 const mailOptions = {
 	from: process.env.MAIL_LOGIN,
 	to: "",
@@ -79,29 +70,29 @@ const server = http.createServer(async function (request, response) {
 					//Change depending on what the client is requesting
 					switch (body.type) {
 						case RequestType.getAllPlayers:
-							answer = await db.getAllPlayers(client);
+							answer = await db.getAllPlayers();
 							break;
 						case RequestType.createPlayer:
 
-							//We get the pseudo
+							//On récupère le pseudo
 							var pseudo = body.data.createdUserUsername;
-							//Generate id server side
+							//Génération de l'ID du joueur coté serveur pour qu'il n'y ai pas de charactère spéciaux
 							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-							//Image in base64
+							//Image en base64
 							var imageBase64 = body.data.createdUserProfilePicture;
 
-							//Uploads the image to imgur
+							//Envoi de l'image sur imgur
 							var imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, "");
 
 							if (!imageUrl) break;
 
-							//Generate validationId used on the url to verify creation
+							//Création de l'id de validation qu'on va envoyer au admins
 							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo) + ":" + encodeURI(imageUrl);
 
-							//Add the current validation to the db so that it's not lost when server shuts down
-							var res = await db.addPendingValidation(client, validationId);
+							//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
+							var res = await db.addPendingValidation(validationId);
 
-							//If the creation was successful, send the mail to the admins
+							//Si tout à réussi, on envoie un mail au admins
 							if (res) {
 								var mo = mailOptions;
 								mo.subject = "Joueur à créer: " + pseudo;
@@ -112,31 +103,31 @@ const server = http.createServer(async function (request, response) {
 								sendMail(mo);
 
 								answer = true;
-							}
+							} else answer = false;
 
 							break;
 						case RequestType.deletePlayer:
-							answer = await db.deletePlayer(client, body.data.deletedUserId);
+							answer = await db.deletePlayer(body.data.deletedUserId);
 							break;
 						case RequestType.validateChallenge:
-							//Get the ids
+							//Récupère les id
 							var userId = body.data.validatedUserId;
 							var challengeId = body.data.validatedChallengeId;
-							//Image in base64
+							//Image en base64
 							var imageBase64 = body.data.validatedChallengeImage;
 
-							//Uploads the image to imgur
+							//Envoie l'image sur imgur
 							var imageUrl = await uploadImage(imageBase64);
 
 							if (!imageUrl) break;
 
-							//Generate validationId used on the url to verify validation
+							//Création de l'id de validation qu'on va envoyer au admins
 							var validationId = "defi:" + makeId(5) + ":" + encodeURI(userId) + ":" + encodeURI(challengeId);
 
-							//Add the current validation to the db so that it's not lost when server shuts down
-							var res = await db.addPendingValidation(client, validationId);
+							//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
+							var res = await db.addPendingValidation(validationId);
 
-							//If the creation was successful, send the mail to the admins
+							//Si tout à réussi, on envoie un mail au admins
 							if (res) {
 								var mo = mailOptions;
 								mo.subject = "Défi à valider pour " + userId;
@@ -147,16 +138,16 @@ const server = http.createServer(async function (request, response) {
 								sendMail(mo);
 
 								answer = true;
-							}
+							} else answer = false;
 							break;
 						case RequestType.getAllDefi:
-							answer = await db.getAllDefi(client);
+							answer = await db.getAllDefi();
 							break;
 						case RequestType.createDefi:
-							answer = await db.createDefi(client, body.data.createdDefiId, body.data.createdDefiName, body.data.createdDefiDescription, body.data.createdDefiPoints);
+							answer = await db.createDefi(body.data.createdDefiId, body.data.createdDefiName, body.data.createdDefiDescription, body.data.createdDefiPoints);
 							break;
 						case RequestType.deleteDefi:
-							answer = await db.deleteDefi(client, body.data.deletedDefiId);
+							answer = await db.deleteDefi(body.data.deletedDefiId);
 							break;
 						case RequestType.generateEncryptionKey:
 							answer = await encryption.generateKeyPairs();
@@ -176,7 +167,7 @@ const server = http.createServer(async function (request, response) {
 
 
 
-	//Validation only (when accessings validation urls from the mail)
+	//Validation seulement (les URLs que l'on envoie au admins sont traitées ici)
 	if (request.method == "GET") {
 		var answer = "";
 
@@ -184,17 +175,17 @@ const server = http.createServer(async function (request, response) {
 
 		//On extrait les parties de l'id qui sont nécessaires au opérations
 		//On utilise decodeURI pour récupérer les charactères spéciaux du pseudo
-		const parts = await decodeURI(validationId).split(":");
+		const parts = decodeURI(validationId).split(":");
 
 		//Demande de validation de défi
 		if (validationId.startsWith("defi:")) {
-			const validationRequests = await db.tryValidation(client, validationId);
+			const validationRequests = await db.tryValidation(validationId);
 
 
 			if (validationRequests) {
-				const res = await db.validateChallenge(client, parts[2], parts[3]);
+				const res = await db.validateChallenge(parts[2], parts[3]);
 
-				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
+				answer = res ? "Défi validé" : "Défi non validé (déjà validé?)";
 			} else {
 				answer = "Défi non validé (déjà validé?)";
 			}
@@ -202,20 +193,24 @@ const server = http.createServer(async function (request, response) {
 		}
 		//Demande de validation de joueur
 		else if (validationId.startsWith("user:")) {
-			const validationRequests = await db.tryValidation(client, validationId);
+			const validationRequests = await db.tryValidation(validationId);
 
 			if (validationRequests) {
-				const res = await db.createPlayer(client, parts[2], parts[3], "https://i.imgur.com/" + parts[4]);
+				const res = await db.createPlayer(parts[2], parts[3], "https://i.imgur.com/" + parts[4]);
 
-				answer = await res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
+				answer = res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
 			} else {
 				answer = "Joueur non créé (déjà créé?)";
 			}
 		}
+		//Rechargement des défis à partir du doc excel
+		else if (validationId.startsWith("reloadchallenges")) {
+
+		}
 
 
-		await response.writeHead(200, { "Content-Type": "application/json" });
-		await response.end(JSON.stringify(answer));
+		response.writeHead(200, { "Content-Type": "application/json" });
+		response.end(JSON.stringify(answer));
 	}
 });
 
@@ -276,7 +271,7 @@ function sendMail(mailOptions) {
  */
 async function uploadImage(imageBase64) {
 	const headers = new Headers();
-	headers.append("Authorization", "Client-ID 0cab4834935cf6b");
+	headers.append("Authorization", "Client-ID " + process.env.IMGUR_ID);
 
 	const formdata = new FormData();
 	formdata.append("image", imageBase64);
@@ -308,7 +303,6 @@ async function uploadImage(imageBase64) {
 	} catch (error) {
 		return "https://i.imgur.com/AJ3InNO.png";
 	}
-
 }
 
 /**
