@@ -15,6 +15,7 @@ function initSheetReader() {
 
 
 async function getChallenges() {
+    const sheet = await doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
     console.log(rows);
 }
