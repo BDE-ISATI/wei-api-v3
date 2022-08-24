@@ -1,7 +1,5 @@
 /*
-Global db stores all player data in a hash, one player = one field
-hash key : player
-
+players:
 id {
 	name,
 	id,
@@ -9,8 +7,7 @@ id {
 	challenges_done
 }
 
-defis db stores only challenges as strings
-
+challenges:
 id {
 	name,
 	id,
@@ -19,6 +16,7 @@ id {
 }
 
 */
+
 const playerHashName = "players";
 const defiHashName = "defis";
 const validationSetName = "toValidate";
@@ -26,20 +24,12 @@ const validationSetName = "toValidate";
 //Users are in db 1 in a basic set. User set, exists and del
 //Challenges are stored in db 2, under hash defis. use hSet, hVals, hDel
 
-const Perm = {
-	all: 3,
-	manager: 2,
-	player: 1,
-	none: 0,
-};
-
 const redis = require("redis");
 
 //Our redis client
 var client;
 
 
-//We need the await, otherwise the server will start before redis is ready
 /**
  * Initialization of redis
  */
@@ -163,6 +153,5 @@ module.exports = {
 	deleteDefi,
 	getDefi,
 	addPendingValidation,
-	tryValidation,
-	Perm,
+	tryValidation
 };

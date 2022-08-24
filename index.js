@@ -1,5 +1,6 @@
 const http = require("http");
 const db = require("./dbtools");
+const googlesheet = require("./sheetsreader.js")
 const encryption = require("./encryption.js");
 const nodemailer = require('nodemailer');
 
@@ -17,8 +18,9 @@ const server_url = process.env.SERVER_URL;
 
 INITIALISATION
 */
-
 db.initRedis();
+googlesheet.initSheetReader();
+googlesheet.getChallenges();
 
 
 //
@@ -47,27 +49,26 @@ const mailOptions = {
 // SERVER
 const server = http.createServer(async function (request, response) {
 
-	//On request from client (these will always be post requests)
+	//Lors d'une requète d'un client (Toujours des requètes POST pour avoir les joueurs, etc)
 	if (request.method == "POST") {
-		//Data
+		//Données de la demande
 		var body = "";
 
-		//Retrieve data
+		//Récupère la demande
 		request.on("data", function (data) {
 			body += data;
 		});
 
 		request.on("end", async function () {
-			//Parse data
+			//On récupère les données de la demande
 			body = JSON.parse(body);
-			//console.log(body);
 
 			var answer = {};
 			try {
-				//Should not happen
+				//Ne devrais pas arriver mais on sais jamais, vérification de sécurité
 				if (body.type) {
 
-					//Change depending on what the client is requesting
+					//La réponse varie selon la demande (un RequestType)
 					switch (body.type) {
 						case RequestType.getAllPlayers:
 							answer = await db.getAllPlayers();
@@ -167,7 +168,7 @@ const server = http.createServer(async function (request, response) {
 
 
 
-	//Validation seulement (les URLs que l'on envoie au admins sont traitées ici)
+	//Validation seulement (les URLs que l'on envoie au admins sont traitées ici). Toujours des GET
 	if (request.method == "GET") {
 		var answer = "";
 
