@@ -15,13 +15,13 @@ async function initSheetReader() {
 
 
 async function getChallenges() {
-    await doc.loadInfo();
-    const sheet = await doc.sheetsByIndex[0];
-    await sheet.loadHeaderRow(0);
-    const rows = await sheet.getRows({limt: 100});
-    rows.forEach(row => {
-        console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}`);
-    });
+    //await doc.loadInfo();
+    //const sheet = await doc.sheetsByIndex[0];
+    //await sheet.loadHeaderRow(0);
+    //const rows = await sheet.getRows({limt: 100});
+    //rows.forEach(row => {
+    //    console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}`);
+    //});
 }
 
 module.exports = {
