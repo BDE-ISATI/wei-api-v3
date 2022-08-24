@@ -66,13 +66,13 @@ async function createPlayer(id, name, profilePictureUrl) {//Avoid overwriting pl
 		profilePictureUrl: profilePictureUrl
 	}))
 
-	return player == 1;
+	return player >= 1;
 }
 
 async function deletePlayer(id) {
 	const player = await client.hDel(playerHashName, id);
 
-	return player == 1;
+	return player >= 1;
 }
 
 async function validateChallenge(id, defiId) {
@@ -109,14 +109,19 @@ async function createDefi(defiId, defiName, defiDescription, defiPoints) {
 		points: defiPoints
 	}))
 
-	return defi == 1;
+	return defi >= 1;
 }
 
 async function deleteDefi(defiId) {
 	const defi = await client.hDel(defiHashName, defiId);
 
-	return defi == 1;
+	return defi >= 1;
+}
 
+async function clearDefis() {
+	const res = client.del(defiHashName);
+
+	return res >= 1;
 }
 
 async function getDefi(defiId) {
@@ -126,13 +131,13 @@ async function getDefi(defiId) {
 async function addPendingValidation(validationId) {
 	const res = await client.sAdd(validationSetName, validationId);
 
-	return res == 1;
+	return res >= 1;
 }
 
 async function tryValidation(validationId) {
 	const res = await client.sRem(validationSetName, validationId);
 
-	return res == 1;
+	return res >= 1;
 }
 
 async function addEvent(event) {
@@ -151,6 +156,7 @@ module.exports = {
 	getAllDefi,
 	createDefi,
 	deleteDefi,
+	clearDefis,
 	getDefi,
 	addPendingValidation,
 	tryValidation

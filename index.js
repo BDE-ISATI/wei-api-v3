@@ -209,7 +209,9 @@ const server = http.createServer(async function (request, response) {
 		}
 		//Rechargement des défis à partir du doc excel
 		else if (validationId.startsWith("reloadchallenges")) {
+			const res = await googlesheet.getChallenges();
 
+			answer = res ? "Challenges rechargés" : "Erreur: contactez l'admin"
 		}
 
 
