@@ -36,7 +36,7 @@ async function getChallenges() {
         rows.forEach(row => {
             console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}, image: ${row.image}`);
     
-            db.createDefi(row.identifiant, row.nom, row.description, row.points, row.image);
+            db.createDefi(row.identifiant, row.nom, row.description, parseInt(row.points), row.image);
         });
         
         return true;
