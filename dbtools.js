@@ -141,10 +141,6 @@ async function tryValidation(validationId) {
 	return res >= 1;
 }
 
-async function addEvent(event) {
-	
-}
-
 
 
 

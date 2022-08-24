@@ -110,8 +110,6 @@ const server = http.createServer(async function (request, response) {
 							} else answer = false;
 
 							break;
-						case RequestType.deletePlayer:
-							break;
 						case RequestType.validateChallenge:
 							//Récupère les id
 							var userId = body.data.validatedUserId;
@@ -146,10 +144,6 @@ const server = http.createServer(async function (request, response) {
 						case RequestType.getAllDefi:
 							answer = await db.getAllDefi();
 							break;
-						case RequestType.createDefi:
-							break;
-						case RequestType.deleteDefi:
-							break;
 						case RequestType.generateEncryptionKey:
 							answer = await encryption.generateKeyPairs();
 							break;
@@ -161,6 +155,7 @@ const server = http.createServer(async function (request, response) {
 				console.log(error);
 			}
 
+			//Réponse envoyée au client
 			response.writeHead(200, { "Content-Type": "application/json" });
 			response.end(JSON.stringify(answer));
 		});
@@ -192,6 +187,8 @@ const server = http.createServer(async function (request, response) {
 			}
 
 		}
+		//
+		//
 		//Demande de validation de joueur
 		else if (validationId.startsWith("user:")) {
 			const validationRequests = await db.tryValidation(validationId);
@@ -204,6 +201,8 @@ const server = http.createServer(async function (request, response) {
 				answer = "Joueur non créé (déjà créé?)";
 			}
 		}
+		//
+		//
 		//Rechargement des défis à partir du doc excel
 		else if (validationId.startsWith("reloadchallenges")) {
 			//On actualise les défis
@@ -214,6 +213,8 @@ const server = http.createServer(async function (request, response) {
 		}
 
 
+
+		//Réponse envoyée au client
 		response.writeHead(200, { "Content-Type": "application/json" });
 		response.end(JSON.stringify(answer));
 	}
@@ -310,18 +311,6 @@ async function uploadImage(imageBase64) {
 	}
 }
 
-/**
- * Find the correct decoding key from `key` and uses it to decode then auth
- * @param {string} password the encoded password
- * @param {string} key the key used to encode
- * @returns returns true if the decoded password is equal to `process.env.ADMIN_PASSWORD`
- */
-function isAuth(password, key) {
-	const password_decrypted = encryption.decrypt(password, key);
-
-	return password_decrypted.message == process.env.ADMIN_PASSWORD;
-}
-
 
 //
 //
@@ -330,10 +319,7 @@ function isAuth(password, key) {
 const RequestType = {
 	getAllPlayers: "getAllPlayers",
 	createPlayer: "createPlayer",
-	deletePlayer: "deletePlayer",
 	validateChallenge: "validateChallenge",
 	getAllDefi: "getAllDefi",
-	createDefi: "createDefi",
-	deleteDefi: "deleteDefi",
 	generateEncryptionKey: "generateEncryptionKey",
 };

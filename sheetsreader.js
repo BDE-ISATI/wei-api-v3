@@ -1,11 +1,13 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const db = require("./dbtools.js")
 
-// Initialize the sheet - doc ID is the long id in the sheets URL
+// The document we will reader from
 var doc;
 
 
-
+/**
+ * initializes the sheet reader
+ */
 async function initSheetReader() {
     doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 
@@ -13,7 +15,10 @@ async function initSheetReader() {
     doc.useApiKey(process.env.GOOGLE_API_KEY);
 }
 
-
+/**
+ * Loads all challenges from the specified google sheet 
+ * @returns `true` if all challenges were loaded, `false` if not
+ */
 async function getChallenges() {
     console.log("Reloading challenges");
 
