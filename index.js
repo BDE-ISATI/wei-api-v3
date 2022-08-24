@@ -195,6 +195,8 @@ const server = http.createServer(async function (request, response) {
 				const res = await db.validateChallenge(client, parts[2], parts[3]);
 
 				answer = await res ? "Défi validé" : "Défi non validé (déjà validé?)";
+			} else {
+				answer = "Défi non validé (déjà validé?)";
 			}
 
 		}
@@ -206,6 +208,8 @@ const server = http.createServer(async function (request, response) {
 				const res = await db.createPlayer(client, parts[2], parts[3], "https://i.imgur.com/" + parts[4]);
 
 				answer = await res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
+			} else {
+				answer = "Joueur non créé (déjà créé?)";
 			}
 		}
 
