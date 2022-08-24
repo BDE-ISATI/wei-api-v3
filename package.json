@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "deploy": "node deploy.js",
     "toheroku": "git push heroku main"
   },
   "author": "Edorion",
