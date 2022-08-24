@@ -18,10 +18,13 @@ const server_url = process.env.SERVER_URL;
 
 INITIALISATION
 */
-db.initRedis();
-googlesheet.initSheetReader();
-googlesheet.getChallenges();
+async function init() {
+	db.initRedis();
+	await googlesheet.initSheetReader();
+	await googlesheet.getChallenges();
 
+}
+init();
 
 //
 //
