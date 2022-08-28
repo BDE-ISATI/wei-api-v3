@@ -153,6 +153,7 @@ const server = http.createServer(async function (request, response) {
 							break;
 						case RequestType.getAllTeams:
 							answer = await db.getAllTeams();
+							break;
 						default:
 							break;
 					}
