@@ -163,6 +163,10 @@ async function createTeam(teamId, teamName, teamLeaderMail, teamImageUrl) {
 
 async function getTeam(teamId) {
 	const res = await client.hGet(teamHashName, teamId);
+	if (res == null) {
+		console.log("Cette équipe n'existe plus");
+		return null;
+	}
 	const team = await JSON.parse(res);
 
 	const players = await getAllPlayers();

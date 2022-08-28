@@ -3,6 +3,7 @@ const db = require("./dbtools");
 const googlesheet = require("./sheetsreader.js")
 const encryption = require("./encryption.js");
 const nodemailer = require('nodemailer');
+const { readlink } = require("fs");
 
 // Listen on a specific host via the HOST environment variable
 const host = process.env.HOST || "0.0.0.0";
@@ -122,6 +123,11 @@ const server = http.createServer(async function (request, response) {
 							var challengeId = body.data.validatedChallengeId;
 							var user = await db.getPlayer(userId);
 							var team = await db.getTeam(user.teamId);
+							if (team == null) {
+								answer = false;
+								break;
+							}
+
 							//Image en base64
 							var imageBase64 = body.data.validatedChallengeImage;
 
