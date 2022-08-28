@@ -158,8 +158,8 @@ async function getTeam(teamId) {
 	const res = await client.hGet(teamHashName, teamId);
 	const team = await JSON.parse(res);
 
-	const players_vals = await getAllPlayers();
-	const teamPlayers = players_vals.foreach(player => JSON.parse(player)).filter(player => player.teamId == teamId);
+	const players = await getAllPlayers();
+	const teamPlayers = players.filter(player => player.teamId == teamId);
 	const points = teamPlayers.reduce((previous, current) => previous.points + current.points, 0);
 
 	team.players = teamPlayers;
