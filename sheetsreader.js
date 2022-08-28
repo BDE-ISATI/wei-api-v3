@@ -60,7 +60,7 @@ async function reloadTeams() {
     try {
         //Get all doc data
         await doc.loadInfo();
-        const sheet = await doc.sheetsByIndex[2];
+        const sheet = await doc.sheetsByIndex[1];
         await sheet.loadHeaderRow(1);
         const rows = await sheet.getRows({ limt: 100 });
 
