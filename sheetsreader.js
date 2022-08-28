@@ -41,6 +41,7 @@ async function reloadChallenges() {
             }
         });
 
+        console.log("Challenges loaded!");
         return true;
     } catch (error) {
         console.log("Error while reloading challenges!");
@@ -55,7 +56,7 @@ async function reloadChallenges() {
  * @returns `true` if all challenges were loaded, `false` if not
  */
 async function reloadTeams() {
-    console.log("Reloading challenges");
+    console.log("Reloading teams");
 
     try {
         //Get all doc data
@@ -76,6 +77,7 @@ async function reloadTeams() {
             }
         });
 
+        console.log("Teams loaded!");
         return true;
     } catch (error) {
         console.log("Error while reloading teams!");

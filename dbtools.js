@@ -143,11 +143,12 @@ async function tryValidation(validationId) {
 	return res >= 1;
 }
 
-async function createTeam(teamName, teamId, teamLeaderMail) {
+async function createTeam(teamName, teamId, teamLeaderMail, teamImageUrl) {
 	const res = await client.hSet(teamHashName, teamId, JSON.stringify({
 		teamId: teamId,
 		teamName: teamName, 
-		teamLeaderMail: teamLeaderMail
+		teamLeaderMail: teamLeaderMail,
+		teamImageUrl: teamImageUrl
 	}))
 
 	return res >= 1;
