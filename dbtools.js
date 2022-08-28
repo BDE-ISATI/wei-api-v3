@@ -19,6 +19,7 @@ id {
 
 const playerHashName = "players";
 const defiHashName = "defis";
+const teamHashName = "teams";
 const validationSetName = "toValidate";
 
 //Users are in db 1 in a basic set. User set, exists and del
@@ -34,7 +35,7 @@ var client;
  * Initialization of redis
  */
 async function initRedis() {
-	console.log("Initiating redis"); 
+	console.log("Initiating redis");
 	client = redis.createClient({ url: process.env.REDIS_URL });
 	client.on("error", (err) => console.log("Redis Client Error", err));
 	await client.connect();
@@ -55,13 +56,14 @@ async function getAllPlayers() {
 	return players;
 }
 
-async function createPlayer(id, name, profilePictureUrl) {//Avoid overwriting player
+async function createPlayer(id, name, teamId, profilePictureUrl) {//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
 		name: name,
 		id: id,
 		points: 0,
+		teamId: teamId,
 		challenges_done: [],
 		profilePictureUrl: profilePictureUrl
 	}))
@@ -141,6 +143,43 @@ async function tryValidation(validationId) {
 	return res >= 1;
 }
 
+async function createTeam(teamName, teamId, teamLeaderMail) {
+	const res = await client.hSet(teamHashName, teamId, JSON.stringify({
+		teamId: teamId,
+		teamName: teamName, 
+		teamLeaderMail: teamLeaderMail
+	}))
+
+	return res >= 1;
+}
+
+async function getTeam(teamId) {
+	const res = await client.hGet(teamHashName, teamId);
+	const team = await JSON.parse(res);
+
+	const players_vals = await getAllPlayers();
+	const teamPlayers = players_vals.foreach(player => JSON.parse(player)).filter(player => player.teamId == teamId);
+	const points = teamPlayers.reduce((previous, current) => previous.points + current.points, 0);
+
+	team.players = teamPlayers;
+	team.points = points;
+
+	return team;
+}
+
+async function getAllTeams() {
+	const teams_keys = await client.hKeys(teamHashName);
+
+	const teams = teams_keys.map(teamId => await getTeam(teamId));
+
+	return teams;
+}
+
+async function clearTeams() {
+	const res = client.del(teamHashName);
+
+	return res >= 1;
+}
 
 
 
@@ -156,5 +195,9 @@ module.exports = {
 	clearDefis,
 	getDefi,
 	addPendingValidation,
-	tryValidation
+	tryValidation,
+	createTeam,
+	getTeam,
+	getAllTeams,
+	clearTeams
 };

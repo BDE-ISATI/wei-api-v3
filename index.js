@@ -21,8 +21,8 @@ INITIALISATION
 async function init() {
 	db.initRedis();
 	await googlesheet.initSheetReader();
-	await googlesheet.getChallenges();
-
+	await googlesheet.reloadChallenges();
+	await googlesheet.reloadTeams();
 }
 init();
 
@@ -82,6 +82,9 @@ const server = http.createServer(async function (request, response) {
 							var pseudo = body.data.createdUserUsername;
 							//Génération de l'ID du joueur coté serveur pour qu'il n'y ai pas de charactère spéciaux
 							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+							//L'équipe du joueur
+							var teamId = body.data.createdUserTeam;
+
 							//Image en base64
 							var imageBase64 = body.data.createdUserProfilePicture;
 
@@ -91,7 +94,7 @@ const server = http.createServer(async function (request, response) {
 							if (!imageUrl) break;
 
 							//Création de l'id de validation qu'on va envoyer au admins
-							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo) + ":" + encodeURI(imageUrl);
+							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo) + ":" + encodeURI(teamId) + ":" + encodeURI(imageUrl);
 
 							//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
 							var res = await db.addPendingValidation(validationId);
@@ -136,6 +139,7 @@ const server = http.createServer(async function (request, response) {
 									+ "Preuve photo: " + imageUrl + "\n"
 									+ "Valider le défi: " + server_url + "/" + validationId;
 
+								emails = process.env.MAIL_ADMIN.split(";");
 								sendMail(mo);
 
 								answer = true;
@@ -194,7 +198,7 @@ const server = http.createServer(async function (request, response) {
 			const validationRequests = await db.tryValidation(validationId);
 
 			if (validationRequests) {
-				const res = await db.createPlayer(parts[2], parts[3], "https://i.imgur.com/" + parts[4]);
+				const res = await db.createPlayer(parts[2], parts[3], parts[4], "https://i.imgur.com/" + parts[5]);
 
 				answer = res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
 			} else {
@@ -206,10 +210,20 @@ const server = http.createServer(async function (request, response) {
 		//Rechargement des défis à partir du doc excel
 		else if (validationId.startsWith("reloadchallenges")) {
 			//On actualise les défis
-			const res = await googlesheet.getChallenges();
+			const res = await googlesheet.reloadChallenges();
 
 			//Si erreur on le signale à l'admin
 			answer = res ? "Challenges rechargés" : "Erreur: contactez l'admin"
+		}
+		//
+		//
+		//Rechargement des équipes à partir du doc excel
+		else if (validationId.startsWith("reloadteams")) {
+			//On actualise les défis
+			const res = await googlesheet.reloadTeams();
+
+			//Si erreur on le signale à l'admin
+			answer = res ? "Equipes rechargés" : "Erreur: contactez l'admin"
 		}
 
 
@@ -254,9 +268,8 @@ function makeId(length) {
  * Sends an email to all admins
  * @param {*} mailOptions mail options (see https://nodemailer.com/message/)
  */
-function sendMail(mailOptions) {
-	const admins = process.env.MAIL_ADMIN.split(";");
-	admins.forEach(mail => {
+function sendMail(mailOptions, emails) {
+	emails.forEach(mail => {
 		mailOptions.to = mail;
 		transporter.sendMail(mailOptions, function (error, info) {
 			if (error) {
