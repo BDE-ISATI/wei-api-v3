@@ -160,7 +160,7 @@ async function getTeam(teamId) {
 
 	const players = await getAllPlayers();
 	const teamPlayers = await players.filter(player => player.teamId == teamId);
-	const points = await teamPlayers.reduce((previous, current) => previous.points + current.points, 0);
+	const points = await teamPlayers.reduce((previous, current) => previous + current.points, 0);
 
 	team.players = teamPlayers;
 	team.points = points;
