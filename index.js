@@ -280,6 +280,7 @@ function makeId(length) {
 function sendMail(mailOptions, emails) {
 	emails.forEach(mail => {
 		mailOptions.to = mail;
+		console.log("Sending mail to " + mail);
 		transporter.sendMail(mailOptions, function (error, info) {
 			if (error) {
 				console.log(error);
