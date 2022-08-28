@@ -159,8 +159,8 @@ async function getTeam(teamId) {
 	const team = await JSON.parse(res);
 
 	const players = await getAllPlayers();
-	const teamPlayers = players.filter(player => player.teamId == teamId);
-	const points = teamPlayers.reduce((previous, current) => previous.points + current.points, 0);
+	const teamPlayers = await players.filter(player => player.teamId == teamId);
+	const points = await teamPlayers.reduce((previous, current) => previous.points + current.points, 0);
 
 	team.players = teamPlayers;
 	team.points = points;
@@ -172,7 +172,10 @@ async function getAllTeams() {
 	const teams_keys = await client.hKeys(teamHashName);
 
 	const teams = teams_keys.map(async function (teamId) {
-		return await getTeam(teamId);
+		console.log(teamId);
+		const team = await getTeam(teamId);
+		console.log(team);
+		return team;
 	});
 
 	return teams;
