@@ -151,6 +151,8 @@ const server = http.createServer(async function (request, response) {
 						case RequestType.generateEncryptionKey:
 							answer = await encryption.generateKeyPairs();
 							break;
+						case RequestType.getAllTeams:
+							answer = await db.getAllTeams();
 						default:
 							break;
 					}
@@ -335,4 +337,5 @@ const RequestType = {
 	validateChallenge: "validateChallenge",
 	getAllDefi: "getAllDefi",
 	generateEncryptionKey: "generateEncryptionKey",
+	getAllTeams: "getAlLTeams"
 };
