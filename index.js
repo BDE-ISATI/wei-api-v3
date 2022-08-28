@@ -84,6 +84,7 @@ const server = http.createServer(async function (request, response) {
 							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
 							//L'équipe du joueur
 							var teamId = body.data.createdUserTeam;
+							var team = await db.getTeam(teamId);
 
 							//Image en base64
 							var imageBase64 = body.data.createdUserProfilePicture;
@@ -107,7 +108,9 @@ const server = http.createServer(async function (request, response) {
 									+ "Image: " + "https://i.imgur.com/" + imageUrl + "\n"
 									+ "Créer le joueur: " + server_url + "/" + validationId;
 
-								sendMail(mo);
+								var emails = process.env.MAIL_ADMIN.split(";");
+								emails.push(team.teamLeaderMail);
+								sendMail(mo, emails);
 
 								answer = true;
 							} else answer = false;
@@ -117,6 +120,8 @@ const server = http.createServer(async function (request, response) {
 							//Récupère les id
 							var userId = body.data.validatedUserId;
 							var challengeId = body.data.validatedChallengeId;
+							var user = await db.getPlayer(userId);
+							var team = await db.getTeam(user.teamId);
 							//Image en base64
 							var imageBase64 = body.data.validatedChallengeImage;
 
@@ -139,8 +144,9 @@ const server = http.createServer(async function (request, response) {
 									+ "Preuve photo: " + imageUrl + "\n"
 									+ "Valider le défi: " + server_url + "/" + validationId;
 
-								emails = process.env.MAIL_ADMIN.split(";");
-								sendMail(mo);
+								var emails = process.env.MAIL_ADMIN.split(";");
+								emails.push(team.teamLeaderMail);
+								sendMail(mo, emails);
 
 								answer = true;
 							} else answer = false;

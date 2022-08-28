@@ -71,6 +71,12 @@ async function createPlayer(id, name, teamId, profilePictureUrl) {//Avoid overwr
 	return player >= 1;
 }
 
+async function getPlayer(id) {
+	const player = await client.hGet(playerHashName, id);
+
+	return player;
+}
+
 async function deletePlayer(id) {
 	const player = await client.hDel(playerHashName, id);
 
@@ -172,8 +178,6 @@ async function getAllTeams() {
 	const teams_keys = await client.hKeys(teamHashName);
 
 	const teams = await Promise.all(teams_keys.map(async (team) => await getTeam(team)));
-	
-	console.log(teams);
 
 	return teams;
 }
@@ -190,6 +194,7 @@ module.exports = {
 	initRedis,
 	getAllPlayers,
 	createPlayer,
+	getPlayer,
 	deletePlayer,
 	validateChallenge,
 	getAllDefi,
