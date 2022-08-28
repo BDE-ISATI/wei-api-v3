@@ -72,7 +72,8 @@ async function createPlayer(id, name, teamId, profilePictureUrl) {//Avoid overwr
 }
 
 async function getPlayer(id) {
-	const player = await client.hGet(playerHashName, id);
+	const player_val = await client.hGet(playerHashName, id);
+	const player = await JSON.parse(player_val);
 
 	return player;
 }
