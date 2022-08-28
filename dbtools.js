@@ -146,7 +146,7 @@ async function tryValidation(validationId) {
 async function createTeam(teamName, teamId, teamLeaderMail, teamImageUrl) {
 	const res = await client.hSet(teamHashName, teamId, JSON.stringify({
 		teamId: teamId,
-		teamName: teamName, 
+		teamName: teamName,
 		teamLeaderMail: teamLeaderMail,
 		teamImageUrl: teamImageUrl
 	}))
@@ -171,7 +171,9 @@ async function getTeam(teamId) {
 async function getAllTeams() {
 	const teams_keys = await client.hKeys(teamHashName);
 
-	const teams = teams_keys.map(teamId => getTeam(teamId));
+	const teams = teams_keys.map(async function (teamId) {
+		return await getTeam(teamId);
+	});
 
 	return teams;
 }
