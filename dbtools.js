@@ -171,10 +171,7 @@ async function getTeam(teamId) {
 async function getAllTeams() {
 	const teams_keys = await client.hKeys(teamHashName);
 
-	const teams = await teams_keys.map(async function (teamId) {
-		const team = await getTeam(teamId);
-		return team;
-	});
+	const teams = await Promise.map(teams_keys, async (team) => await getTeam(team));
 	
 	console.log(teams);
 
