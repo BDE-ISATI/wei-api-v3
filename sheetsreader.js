@@ -72,7 +72,7 @@ async function reloadTeams() {
 
             if (row.identifiant != "" && row.nom != "" && row.mail) {
                 console.log(`Id: ${row.identifiant}, nom: ${row.nom}, mail: ${row.mail}, image ${row.image}`);
-                db.createTeam(row.identifiant, row.nom, row.mail, row.image);
+                db.createTeam(row.identifiant, row.nom, row.mail.split(" ").filter(x => x.contains("@")), row.image);
                 db.createPlayer(row.identifiant, row.nom, row.identifiant, row.image, true);
             }
         });
