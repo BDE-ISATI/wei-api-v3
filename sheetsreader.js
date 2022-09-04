@@ -34,8 +34,8 @@ async function reloadChallenges() {
 
         //add all new challenges
         rows.forEach(row => {
-
             if (row.identifiant != "" && row.nom != "" && row.description != "" && row.points != "" && row.image != "" && row.team_uniquement != "") {
+                console.log(row.team_uniquement);
                 console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}, image: ${row.image}`);
                 db.createDefi(row.identifiant, row.nom, row.description, parseInt(row.points), row.image, row.team_uniquement == "VRAI");
             }
