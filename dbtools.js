@@ -56,7 +56,8 @@ async function getAllPlayers() {
 	return players;
 }
 
-async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {//Avoid overwriting player
+async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {
+	//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
