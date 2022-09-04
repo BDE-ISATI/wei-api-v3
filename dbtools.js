@@ -91,6 +91,9 @@ async function validateChallenge(id, defiId) {
 	const player = await client.hGet(playerHashName, id);
 	const json = JSON.parse(player);
 
+	console.log(json);
+	console.log(defi);
+
 	if (json.challenges_done.includes(defi.id) || defi.teamOnly != json.isTeam) {
 		return false;
 	} else {
