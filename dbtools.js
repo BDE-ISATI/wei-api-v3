@@ -56,7 +56,7 @@ async function getAllPlayers() {
 	return players;
 }
 
-async function createPlayer(id, name, teamId, profilePictureUrl) {//Avoid overwriting player
+async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
 	const player = await client.hSet(playerHashName, id, JSON.stringify({
@@ -65,7 +65,8 @@ async function createPlayer(id, name, teamId, profilePictureUrl) {//Avoid overwr
 		points: 0,
 		teamId: teamId,
 		challenges_done: [],
-		profilePictureUrl: profilePictureUrl
+		profilePictureUrl: profilePictureUrl,
+		isTeam: isTeam
 	}))
 
 	return player >= 1;
@@ -90,7 +91,7 @@ async function validateChallenge(id, defiId) {
 	const player = await client.hGet(playerHashName, id);
 	const json = JSON.parse(player);
 
-	if (json.challenges_done.includes(defi.id)) {
+	if (json.challenges_done.includes(defi.id) || defi.teamOnly != json.isTeam) {
 		return false;
 	} else {
 		json.challenges_done.push(defi.id);
@@ -110,13 +111,14 @@ async function getAllDefi() {
 	return defis;
 }
 
-async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl) {
+async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl, defiTeamOnly) {
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
 		description: defiDescription,
 		points: defiPoints,
-		image: defiImageUrl
+		image: defiImageUrl,
+		teamOnly: defiTeamOnly
 	}))
 
 	return defi >= 1;

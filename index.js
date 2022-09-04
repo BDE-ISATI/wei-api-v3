@@ -200,9 +200,9 @@ const server = http.createServer(async function (request, response) {
 			if (validationRequests) {
 				const res = await db.validateChallenge(parts[2], parts[3]);
 
-				answer = res ? "Défi validé" : "Défi non validé (déjà validé?)";
+				answer = res ? "Défi validé" : "Défi non validé (déjà validé? Le défi ne peut pas être validé sur ce joueur?)";
 			} else {
-				answer = "Défi non validé (déjà validé?)";
+				answer = "Défi non validé (déjà validé? Le défi ne peut pas être validé sur ce joueur?)";
 			}
 
 		}
@@ -213,7 +213,7 @@ const server = http.createServer(async function (request, response) {
 			const validationRequests = await db.tryValidation(validationId);
 
 			if (validationRequests) {
-				const res = await db.createPlayer(parts[2], parts[3], parts[4], "https://i.imgur.com/" + parts[5]);
+				const res = await db.createPlayer(parts[2], parts[3], parts[4], "https://i.imgur.com/" + parts[5], false);
 
 				answer = res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
 			} else {

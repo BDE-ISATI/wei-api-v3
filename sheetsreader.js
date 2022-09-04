@@ -35,9 +35,9 @@ async function reloadChallenges() {
         //add all new challenges
         rows.forEach(row => {
 
-            if (row.identifiant != "" && row.nom != "" && row.description != "" && row.points != "" && row.image != "") {
+            if (row.identifiant != "" && row.nom != "" && row.description != "" && row.points != "" && row.image != "" && row.team_uniquement != "") {
                 console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}, image: ${row.image}`);
-                db.createDefi(row.identifiant, row.nom, row.description, parseInt(row.points), row.image);
+                db.createDefi(row.identifiant, row.nom, row.description, parseInt(row.points), row.image, row.team_uniquement == "VRAI");
             }
         });
 
@@ -74,6 +74,7 @@ async function reloadTeams() {
             if (row.identifiant != "" && row.nom != "" && row.mail) {
                 console.log(`Id: ${row.identifiant}, nom: ${row.nom}, mail: ${row.mail}, image ${row.image}`);
                 db.createTeam(row.identifiant, row.nom, row.mail, row.image);
+                db.createPlayer(row.identifiant, row.nom, row.identifiant, row.image, true);
             }
         });
 
