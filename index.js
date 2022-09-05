@@ -97,7 +97,6 @@ const server = http.createServer(async function (request, response) {
 								console.log("Couldn't upload image!!")
 								console.log(error);
 							}
-							if (!imageUrl) break;
 
 							//Création de l'id de validation qu'on va envoyer au admins
 							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo) + ":" + encodeURI(teamId) + ":" + encodeURI(imageUrl);
@@ -135,10 +134,14 @@ const server = http.createServer(async function (request, response) {
 							//Image en base64
 							var imageBase64 = body.data.validatedChallengeImage;
 
-							//Envoie l'image sur imgur
-							var imageUrl = await uploadImage(imageBase64);
-
-							if (!imageUrl) break;
+							//Envoi de l'image sur imgur
+							var imageUrl = "https://i.imgur.com/V4RclNb.png";
+							try {
+								imageUrl = (await uploadImage(imageBase64));
+							} catch (error) {
+								console.log("Couldn't upload image!!")
+								console.log(error);
+							}
 
 							//Création de l'id de validation qu'on va envoyer au admins
 							var validationId = "defi:" + makeId(5) + ":" + encodeURI(userId) + ":" + encodeURI(challengeId);
