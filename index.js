@@ -63,11 +63,11 @@ const server = http.createServer(async function (request, response) {
 		});
 
 		request.on('end', async function () {
-			//On récupère les données de la demande
-			body = JSON.parse(body);
 
 			var answer = {};
 			try {
+				//On récupère les données de la demande
+				body = JSON.parse(body);
 				//Ne devrais pas arriver mais on sais jamais, vérification de sécurité
 				if (body.type) {
 
