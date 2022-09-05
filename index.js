@@ -90,8 +90,13 @@ const server = http.createServer(async function (request, response) {
 							var imageBase64 = body.data.createdUserProfilePicture;
 
 							//Envoi de l'image sur imgur
-							var imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, "");
-
+							var imageUrl = "https://i.imgur.com/V4RclNb.png".replace(/https:\/\/i.imgur.com\//g, "");
+							try {
+								imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, "");
+							} catch (error) {
+								console.log("Couldn't upload image!!")
+								console.log(error);
+							}
 							if (!imageUrl) break;
 
 							//Création de l'id de validation qu'on va envoyer au admins
