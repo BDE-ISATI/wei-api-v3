@@ -100,7 +100,15 @@ const server = http.createServer(async function (request, response) {
 			}
 
 			//Réponse envoyée au client
-			response.writeHead(200, { 'Content-Type': 'application/json' });
+			//Réponse envoyée au client	
+			var headers = {
+				'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
+				'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+				'Access-Control-Max-Age': 2592000, // 30 days
+				'Content-Type': 'application/json'
+			};
+
+			response.writeHead(200, headers);
 			response.end(JSON.stringify(answer));
 		});
 	}
@@ -168,8 +176,15 @@ const server = http.createServer(async function (request, response) {
 
 
 
-		//Réponse envoyée au client
-		response.writeHead(200, { 'Content-Type': 'application/json' });
+		//Réponse envoyée au client	
+		var headers = {
+			'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
+			'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+			'Access-Control-Max-Age': 2592000, // 30 days
+			'Content-Type': 'application/json'
+		};
+
+		response.writeHead(200, headers);
 		response.end(JSON.stringify(answer));
 	}
 });
