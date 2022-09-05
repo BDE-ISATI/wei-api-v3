@@ -312,6 +312,7 @@ function sendMail(mailOptions, emails) {
  * @param {string} imageBase64 a string representing a base64 image
  */
 async function uploadImage(imageBase64) {
+	console.log("Received image to upload");
 	const headers = new Headers();
 	headers.append("Authorization", "Client-ID " + process.env.IMGUR_ID);
 
