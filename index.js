@@ -1,12 +1,12 @@
-const http = require("http");
-const db = require("./dbtools");
-const googlesheet = require("./sheetsreader.js")
-const encryption = require("./encryption.js");
+const http = require('http');
+const db = require('./dbtools');
+const googlesheet = require('./sheetsreader.js')
+const encryption = require('./encryption.js');
 const nodemailer = require('nodemailer');
-const { readlink } = require("fs");
+const { readlink } = require('fs');
 
 // Listen on a specific host via the HOST environment variable
-const host = process.env.HOST || "0.0.0.0";
+const host = process.env.HOST || '0.0.0.0';
 // Listen on a specific port via the PORT environment variable
 const port = process.env.PORT || 80;
 //Server url so that we can generate validation urls
@@ -41,7 +41,7 @@ var transporter = nodemailer.createTransport({
 //Default mail options
 const mailOptions = {
 	from: process.env.MAIL_LOGIN,
-	to: "",
+	to: '',
 	subject: '',
 	text: ''
 };
@@ -53,16 +53,16 @@ const mailOptions = {
 const server = http.createServer(async function (request, response) {
 
 	//Lors d'une requète d'un client (Toujours des requètes POST pour avoir les joueurs, etc)
-	if (request.method == "POST") {
+	if (request.method == 'POST') {
 		//Données de la demande
-		var body = "";
+		var body = '';
 
 		//Récupère la demande
-		request.on("data", function (data) {
+		request.on('data', function (data) {
 			body += data;
 		});
 
-		request.on("end", async function () {
+		request.on('end', async function () {
 			//On récupère les données de la demande
 			body = JSON.parse(body);
 
@@ -77,92 +77,10 @@ const server = http.createServer(async function (request, response) {
 							answer = await db.getAllPlayers();
 							break;
 						case RequestType.createPlayer:
-
-							//On récupère le pseudo
-							var pseudo = body.data.createdUserUsername;
-							//Génération de l'ID du joueur coté serveur pour qu'il n'y ai pas de charactère spéciaux
-							var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-							//L'équipe du joueur
-							var teamId = body.data.createdUserTeam;
-							var team = await db.getTeam(teamId);
-
-							//Image en base64
-							var imageBase64 = body.data.createdUserProfilePicture;
-
-							//Envoi de l'image sur imgur
-							var imageUrl = "https://i.imgur.com/V4RclNb.png".replace(/https:\/\/i.imgur.com\//g, "");
-							try {
-								imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, "");
-							} catch (error) {
-								console.log("Couldn't upload image!!")
-								console.log(error);
-							}
-
-							//Création de l'id de validation qu'on va envoyer au admins
-							var validationId = "user:" + makeId(5) + ":" + encodeURI(id) + ":" + encodeURI(pseudo) + ":" + encodeURI(teamId) + ":" + encodeURI(imageUrl);
-
-							//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
-							var res = await db.addPendingValidation(validationId);
-
-							//Si tout à réussi, on envoie un mail au admins
-							if (res) {
-								var mo = mailOptions;
-								mo.subject = "Joueur à créer: " + pseudo;
-								mo.text = "Joueur à créer: " + pseudo + ", id: " + id + "\n"
-									+ "Image: " + "https://i.imgur.com/" + imageUrl + "\n"
-									+ "Créer le joueur: " + server_url + "/" + validationId;
-
-								var emails = process.env.MAIL_ADMIN.split(";");
-								emails.push(team.teamLeaderMail);
-								sendMail(mo, emails);
-
-								answer = true;
-							} else answer = false;
-
+							answer = await createPlayer(body);
 							break;
 						case RequestType.validateChallenge:
-							//Récupère les id
-							var userId = body.data.validatedUserId;
-							var challengeId = body.data.validatedChallengeId;
-							var user = await db.getPlayer(userId);
-							var team = await db.getTeam(user.teamId);
-							if (team == null) {
-								answer = false;
-								break;
-							}
-
-							//Image en base64
-							var imageBase64 = body.data.validatedChallengeImage;
-
-							//Envoi de l'image sur imgur
-							var imageUrl = "https://i.imgur.com/V4RclNb.png";
-							try {
-								imageUrl = (await uploadImage(imageBase64));
-							} catch (error) {
-								console.log("Couldn't upload image!!")
-								console.log(error);
-							}
-
-							//Création de l'id de validation qu'on va envoyer au admins
-							var validationId = "defi:" + makeId(5) + ":" + encodeURI(userId) + ":" + encodeURI(challengeId);
-
-							//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
-							var res = await db.addPendingValidation(validationId);
-
-							//Si tout à réussi, on envoie un mail au admins
-							if (res) {
-								var mo = mailOptions;
-								mo.subject = "Défi à valider pour " + userId;
-								mo.text = "Défi à valider: " + challengeId + " pour " + userId + "\n"
-									+ "Preuve photo: " + imageUrl + "\n"
-									+ "Valider le défi: " + server_url + "/" + validationId;
-
-								var emails = process.env.MAIL_ADMIN.split(";");
-								emails.push(team.teamLeaderMail);
-								sendMail(mo, emails);
-
-								answer = true;
-							} else answer = false;
+							answer = await validateChallenge(body);
 							break;
 						case RequestType.getAllDefi:
 							answer = await db.getAllDefi();
@@ -182,7 +100,7 @@ const server = http.createServer(async function (request, response) {
 			}
 
 			//Réponse envoyée au client
-			response.writeHead(200, { "Content-Type": "application/json" });
+			response.writeHead(200, { 'Content-Type': 'application/json' });
 			response.end(JSON.stringify(answer));
 		});
 	}
@@ -190,68 +108,68 @@ const server = http.createServer(async function (request, response) {
 
 
 	//Validation seulement (les URLs que l'on envoie au admins sont traitées ici). Toujours des GET
-	if (request.method == "GET") {
-		var answer = "";
+	if (request.method == 'GET') {
+		var answer = '';
 
-		var validationId = request.url.replace("/", "");
+		var validationId = request.url.replace('/', '');
 
 		//On extrait les parties de l'id qui sont nécessaires au opérations
 		//On utilise decodeURI pour récupérer les charactères spéciaux du pseudo
-		const parts = decodeURI(validationId).split(":");
+		const parts = decodeURI(validationId).split(':');
 
 		//Demande de validation de défi
-		if (validationId.startsWith("defi:")) {
+		if (validationId.startsWith('defi:')) {
 			const validationRequests = await db.tryValidation(validationId);
 
 
 			if (validationRequests) {
 				const res = await db.validateChallenge(parts[2], parts[3]);
 
-				answer = res ? "Défi validé" : "Défi non validé (déjà validé? Le défi ne peut pas être validé sur ce joueur?)";
+				answer = res ? 'Défi validé' : 'Défi non validé (déjà validé? Le défi ne peut pas être validé sur ce joueur?)';
 			} else {
-				answer = "Défi non validé (déjà validé? Le défi ne peut pas être validé sur ce joueur?)";
+				answer = 'Défi non validé (déjà validé? Le défi ne peut pas être validé sur ce joueur?)';
 			}
 
 		}
 		//
 		//
 		//Demande de validation de joueur
-		else if (validationId.startsWith("user:")) {
+		else if (validationId.startsWith('user:')) {
 			const validationRequests = await db.tryValidation(validationId);
 
 			if (validationRequests) {
-				const res = await db.createPlayer(parts[2], parts[3], parts[4], "https://i.imgur.com/" + parts[5], false);
+				const res = await db.createPlayer(parts[2], parts[3], parts[4], 'https://i.imgur.com/' + parts[5], false);
 
-				answer = res ? "Joueur créé" : "Joueur non créé (déjà créé?)";
+				answer = res ? 'Joueur créé' : 'Joueur non créé (déjà créé?)';
 			} else {
-				answer = "Joueur non créé (déjà créé?)";
+				answer = 'Joueur non créé (déjà créé?)';
 			}
 		}
 		//
 		//
 		//Rechargement des défis à partir du doc excel
-		else if (validationId.startsWith("reloadchallenges")) {
+		else if (validationId.startsWith('reloadchallenges')) {
 			//On actualise les défis
 			const res = await googlesheet.reloadChallenges();
 
 			//Si erreur on le signale à l'admin
-			answer = res ? "Challenges rechargés" : "Erreur: contactez l'admin"
+			answer = res ? 'Challenges rechargés' : 'Erreur: contactez l\'admin'
 		}
 		//
 		//
 		//Rechargement des équipes à partir du doc excel
-		else if (validationId.startsWith("reloadteams")) {
+		else if (validationId.startsWith('reloadteams')) {
 			//On actualise les défis
 			const res = await googlesheet.reloadTeams();
 
 			//Si erreur on le signale à l'admin
-			answer = res ? "Equipes rechargés" : "Erreur: contactez l'admin"
+			answer = res ? 'Equipes rechargés' : 'Erreur: contactez l\'admin'
 		}
 
 
 
 		//Réponse envoyée au client
-		response.writeHead(200, { "Content-Type": "application/json" });
+		response.writeHead(200, { 'Content-Type': 'application/json' });
 		response.end(JSON.stringify(answer));
 	}
 });
@@ -265,6 +183,121 @@ const server = http.createServer(async function (request, response) {
 // Server start
 server.listen(port, host);
 console.log(`Listening at http://${host}:${port}`);
+
+
+//
+//
+// Answers
+async function createPlayer(body) {
+	var answer;
+	//On récupère le pseudo
+	var pseudo = body.data.createdUserUsername;
+	//Génération de l'ID du joueur coté serveur pour qu'il n'y ai pas de charactère spéciaux
+	var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+	//L'équipe du joueur
+	var teamId = body.data.createdUserTeam;
+	var team = await db.getTeam(teamId);
+
+	//Image en base64
+	var imageBase64 = body.data.createdUserProfilePicture;
+
+	//Envoi de l'image sur imgur
+	var imageUrl = 'https://i.imgur.com/V4RclNb.png'.replace(/https:\/\/i.imgur.com\//g, '');
+	try {
+		imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, '');
+	} catch (error) {
+		console.log('Couldn\'t upload image!!')
+		console.log(error);
+	}
+
+	//Création de l'id de validation qu'on va envoyer au admins
+	var validationId = 'user:' + makeId(5) + ':' + encodeURI(id) + ':' + encodeURI(pseudo) + ':' + encodeURI(teamId) + ':' + encodeURI(imageUrl);
+
+	//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
+	var res = await db.addPendingValidation(validationId);
+
+	//Si tout à réussi, on envoie un mail au admins
+	if (res) {
+		var mo = mailOptions;
+		mo.subject = 'Joueur à créer: ' + pseudo;
+		mo.text = 'Joueur à créer: ' + pseudo + ', id: ' + id + '\n'
+			+ 'Image: ' + 'https://i.imgur.com/' + imageUrl + '\n'
+			+ 'Créer le joueur: ' + server_url + '/' + validationId;
+
+		var emails = process.env.MAIL_ADMIN.split(';');
+		emails.push(team.teamLeaderMail);
+		sendMail(mo, emails);
+
+		answer = true;
+	} else answer = false;
+
+	return answer;
+}
+
+async function validateChallenge(body) {
+	var answer;
+	//Récupère les id
+	var userId = body.data.validatedUserId;
+	var challengeId = body.data.validatedChallengeId;
+	var user = await db.getPlayer(userId);
+	var team = await db.getTeam(user.teamId);
+	if (team == null) {
+		answer = false;
+		return answer;
+	}
+
+	//Image en base64
+	var imageBase64 = body.data.validatedChallengeImage;
+
+	//Envoi de l'image sur imgur
+	var imageUrl = 'https://i.imgur.com/V4RclNb.png';
+	try {
+		imageUrl = (await uploadImage(imageBase64));
+	} catch (error) {
+		console.log('Couldn\'t upload image!!')
+		console.log(error);
+	}
+
+	//Création de l'id de validation qu'on va envoyer au admins
+	var validationId = 'defi:' + makeId(5) + ':' + encodeURI(userId) + ':' + encodeURI(challengeId);
+
+	//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
+	var res = await db.addPendingValidation(validationId);
+
+	//Si tout à réussi, on envoie un mail au admins
+	if (res) {
+		var mo = mailOptions;
+		mo.subject = 'Défi à valider pour ' + userId;
+		mo.text = 'Défi à valider: ' + challengeId + ' pour ' + userId + '\n'
+			+ 'Preuve photo: ' + imageUrl + '\n'
+			+ 'Valider le défi: ' + server_url + '/' + validationId;
+
+		var emails = process.env.MAIL_ADMIN.split(';');
+		emails.push(team.teamLeaderMail);
+		sendMail(mo, emails);
+
+		answer = true;
+	} else answer = false;
+	return answer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //
@@ -293,7 +326,7 @@ function makeId(length) {
 function sendMail(mailOptions, emails) {
 	emails.forEach(mail => {
 		mailOptions.to = mail;
-		console.log("Sending mail to " + mail);
+		console.log('Sending mail to ' + mail);
 		transporter.sendMail(mailOptions, function (error, info) {
 			if (error) {
 				console.log(error);
@@ -312,26 +345,26 @@ function sendMail(mailOptions, emails) {
  * @param {string} imageBase64 a string representing a base64 image
  */
 async function uploadImage(imageBase64) {
-	console.log("Received image to upload");
+	console.log('Received image to upload');
 	const headers = new Headers();
-	headers.append("Authorization", "Client-ID " + process.env.IMGUR_ID);
+	headers.append('Authorization', 'Client-ID ' + process.env.IMGUR_ID);
 
 	const formdata = new FormData();
-	formdata.append("image", imageBase64);
-	formdata.append("title", makeId(10));
-	formdata.append("description", "A challenge someone made during the WEI!");
+	formdata.append('image', imageBase64);
+	formdata.append('title', makeId(10));
+	formdata.append('description', 'A challenge someone made during the WEI!');
 
 	const requestOptions = {
 		method: 'POST',
 		headers: headers,
 		body: formdata,
 		redirect: 'follow',
-		origin: "https://wei.isati.org",
-		referer: "https://wei.isati.org/"
+		origin: 'https://wei.isati.org',
+		referer: 'https://wei.isati.org/'
 	};
 
 	// @ts-ignore
-	const res = await fetch("https://api.imgur.com/3/image", requestOptions)
+	const res = await fetch('https://api.imgur.com/3/image', requestOptions)
 		.then(response => response.text())
 		.then(result => { return result })
 
@@ -344,7 +377,7 @@ async function uploadImage(imageBase64) {
 			return false;
 		}
 	} catch (error) {
-		return "https://i.imgur.com/AJ3InNO.png";
+		return 'https://i.imgur.com/AJ3InNO.png';
 	}
 }
 
@@ -354,10 +387,10 @@ async function uploadImage(imageBase64) {
 // Enums
 
 const RequestType = {
-	getAllPlayers: "getAllPlayers",
-	createPlayer: "createPlayer",
-	validateChallenge: "validateChallenge",
-	getAllDefi: "getAllDefi",
-	generateEncryptionKey: "generateEncryptionKey",
-	getAllTeams: "getAlLTeams"
+	getAllPlayers: 'getAllPlayers',
+	createPlayer: 'createPlayer',
+	validateChallenge: 'validateChallenge',
+	getAllDefi: 'getAllDefi',
+	generateEncryptionKey: 'generateEncryptionKey',
+	getAllTeams: 'getAlLTeams'
 };
