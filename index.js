@@ -240,7 +240,7 @@ async function createPlayer(body) {
 			+ 'Créer le joueur: ' + server_url + '/' + validationId;
 
 		var emails = process.env.MAIL_ADMIN.split(';');
-		emails.concat(team.teamLeaderMail);
+		emails = emails.concat(team.teamLeaderMail);
 		sendMail(mo, emails);
 
 		answer = true;
@@ -288,7 +288,7 @@ async function validateChallenge(body) {
 			+ 'Valider le défi: ' + server_url + '/' + validationId;
 
 		var emails = process.env.MAIL_ADMIN.split(';');
-		emails.concat(team.teamLeaderMail);
+		emails = emails.concat(team.teamLeaderMail);
 		sendMail(mo, emails);
 
 		answer = true;
