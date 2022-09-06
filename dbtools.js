@@ -99,7 +99,7 @@ async function validateChallenge(id, defiId) {
 
 	var count = 0;
 	player.challenges_done.forEach(challenge => {
-		if (challenge == id) count++;
+		if (challenge == defiId) count++;
 	});
 
 	if (count >= defi.faisableXFois || defi.teamOnly != player.isTeam) {
