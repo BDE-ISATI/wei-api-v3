@@ -88,24 +88,22 @@ async function deletePlayer(id) {
 
 async function validateChallenge(id, defiId) {
 	const defi = await getDefi(defiId);
+	const player = await getPlayer(id);
 
-	if (defi == null) return false;
-
-	const player = await client.hGet(playerHashName, id);
-	const json = JSON.parse(player);
+	if (defi == null && player == null) return false;
 
 	var count = 0;
-	json.challenges_done.foreach(challenge => {
+	player.challenges_done.foreach(challenge => {
 		if (challenge == id) count++;
 	});
 
-	if (count >= defi.faisableXFois || defi.teamOnly != json.isTeam) {
+	if (count >= defi.faisableXFois || defi.teamOnly != player.isTeam) {
 		return false;
 	} else {
-		json.challenges_done.push(defiId);
-		json.points = json.points + defi.points;
+		player.challenges_done.push(defiId);
+		player.points = player.points + defi.points;
 
-		const res = await client.hSet(playerHashName, id, JSON.stringify(json));
+		const res = await client.hSet(playerHashName, id, player.stringify(json));
 
 		return res == 0
 	}
