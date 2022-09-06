@@ -108,7 +108,7 @@ async function validateChallenge(id, defiId) {
 		player.challenges_done.push(defiId);
 		player.points = player.points + defi.points;
 
-		const res = await client.hSet(playerHashName, id, player.stringify(json));
+		const res = await client.hSet(playerHashName, id, JSON.stringify(player));
 
 		return res == 0
 	}
@@ -118,7 +118,7 @@ async function getAllDefi() {
 	console.log("Loading challenges");
 	const defis_keys = await client.hVals(defiHashName);
 
-	const defis = defis_keys.map(defi => JSON.parse(defi));
+	const defis = await defis_keys.map(defi => JSON.parse(defi));
 
 	return defis;
 }
@@ -152,7 +152,7 @@ async function clearDefis() {
 }
 
 async function getDefi(defiId) {
-	return JSON.parse(await client.hGet(defiHashName, defiId));
+	return await JSON.parse(await client.hGet(defiHashName, defiId));
 }
 
 async function addPendingValidation(validationId) {
