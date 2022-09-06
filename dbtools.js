@@ -49,7 +49,6 @@ async function initRedis() {
  * @returns a list of all players in the db (as json objects)
  */
 async function getAllPlayers() {
-	console.log("Getting players");
 	const players_vals = await client.hVals(playerHashName);
 
 	const players = await players_vals.map(player => JSON.parse(player));
@@ -58,7 +57,7 @@ async function getAllPlayers() {
 }
 
 async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {
-	console.log("Creating player");
+	console.log("Creating player: " + id);
 	//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
@@ -76,7 +75,7 @@ async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {
 }
 
 async function getPlayer(id) {
-	console.log("Getting player");
+	console.log("Getting player: " + id);
 	const player_val = await client.hGet(playerHashName, id);
 	const player = await JSON.parse(player_val);
 
@@ -84,14 +83,14 @@ async function getPlayer(id) {
 }
 
 async function deletePlayer(id) {
-	console.log("Deleting player");
+	console.log("Deleting player: " + id);
 	const player = await client.hDel(playerHashName, id);
 
 	return player >= 1;
 }
 
 async function validateChallenge(id, defiId) {
-	console.log("Validating challenge");
+	console.log("Validating challenge: " + defiId + ", " + id);
 	const defi = await getDefi(defiId);
 	const player = await getPlayer(id);
 
@@ -103,6 +102,7 @@ async function validateChallenge(id, defiId) {
 	});
 
 	if (count >= defi.faisableXFois || defi.teamOnly != player.isTeam) {
+		console.log("Couldn't add challenge");
 		return false;
 	} else {
 		player.challenges_done.push(defiId);
@@ -124,7 +124,7 @@ async function getAllDefi() {
 }
 
 async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl, defiTeamOnly, faisableXFois, actif) {
-	console.log("Creating challenge");
+	console.log("Creating challenge: " + defiId);
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
@@ -140,34 +140,40 @@ async function createDefi(defiId, defiName, defiDescription, defiPoints, defiIma
 }
 
 async function deleteDefi(defiId) {
+	console.log("Deleting challenge: " + defiId);
 	const defi = await client.hDel(defiHashName, defiId);
 
 	return defi >= 1;
 }
 
 async function clearDefis() {
+	console.log("Clearing challenges");
 	const res = client.del(defiHashName);
 
 	return res >= 1;
 }
 
 async function getDefi(defiId) {
+	console.log("Getting challenge: " + defiId);
 	return await JSON.parse(await client.hGet(defiHashName, defiId));
 }
 
 async function addPendingValidation(validationId) {
+	console.log("Add validation");
 	const res = await client.sAdd(validationSetName, validationId);
 
 	return res >= 1;
 }
 
 async function tryValidation(validationId) {
+	console.log("try validation");
 	const res = await client.sRem(validationSetName, validationId);
 
 	return res >= 1;
 }
 
 async function createTeam(teamId, teamName, teamLeaderMail, teamImageUrl) {
+	console.log("Creating team: " + teamId);
 	const res = await client.hSet(teamHashName, teamId, JSON.stringify({
 		teamId: teamId,
 		teamName: teamName,
@@ -179,6 +185,7 @@ async function createTeam(teamId, teamName, teamLeaderMail, teamImageUrl) {
 }
 
 async function getTeam(teamId) {
+	console.log("Getting team: " + teamId);
 	const res = await client.hGet(teamHashName, teamId);
 	if (res == null) {
 		console.log("Cette équipe n'existe plus");
@@ -205,6 +212,7 @@ async function getAllTeams() {
 }
 
 async function clearTeams() {
+	console.log("Clearing teams");
 	const res = client.del(teamHashName);
 
 	return res >= 1;
