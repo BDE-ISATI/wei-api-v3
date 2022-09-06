@@ -217,7 +217,7 @@ async function createPlayer(body) {
 	var imageBase64 = body.data.createdUserProfilePicture;
 
 	//Envoi de l'image sur imgur
-	var imageUrl = 'https://i.imgur.com/V4RclNb.png'.replace(/https:\/\/i.imgur.com\//g, '');
+	var imageUrl = 'V4RclNb.png';
 	try {
 		imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, '');
 	} catch (error) {
