@@ -204,92 +204,103 @@ console.log(`Listening at http://${host}:${port}`);
 //
 // Answers
 async function createPlayer(body) {
-	var answer;
-	//On récupère le pseudo
-	var pseudo = body.data.createdUserUsername;
-	//Génération de l'ID du joueur coté serveur pour qu'il n'y ai pas de charactère spéciaux
-	var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-	//L'équipe du joueur
-	var teamId = body.data.createdUserTeam;
-	var team = await db.getTeam(teamId);
 
-	//Image en base64
-	var imageBase64 = body.data.createdUserProfilePicture;
-
-	//Envoi de l'image sur imgur
-	var imageUrl = 'V4RclNb.png';
+	var answer = false;
 	try {
-		imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, '');
+		//On récupère le pseudo
+		var pseudo = body.data.createdUserUsername;
+		//Génération de l'ID du joueur coté serveur pour qu'il n'y ai pas de charactère spéciaux
+		var id = pseudo.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+		//L'équipe du joueur
+		var teamId = body.data.createdUserTeam;
+		var team = await db.getTeam(teamId);
+
+		//Image en base64
+		var imageBase64 = body.data.createdUserProfilePicture;
+
+		//Envoi de l'image sur imgur
+		var imageUrl = 'V4RclNb.png';
+		try {
+			imageUrl = (await uploadImage(imageBase64)).replace(/https:\/\/i.imgur.com\//g, '');
+		} catch (error) {
+			console.log('Couldn\'t upload image!!')
+			console.log(error);
+		}
+
+		//Création de l'id de validation qu'on va envoyer au admins
+		var validationId = 'user:' + makeId(5) + ':' + encodeURI(id) + ':' + encodeURI(pseudo) + ':' + encodeURI(teamId) + ':' + encodeURI(imageUrl);
+
+		//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
+		var res = await db.addPendingValidation(validationId);
+
+		//Si tout à réussi, on envoie un mail au admins
+		if (res) {
+			var mo = mailOptions;
+			mo.subject = 'Joueur à créer: ' + pseudo;
+			mo.text = `Joueur a créer: \n${pseudo} - identifiant: ${id}\nPhoto de profil: ${imageUrl}\nValider le défi: ${server_url}/${validationId}`;
+
+			var emails = process.env.MAIL_ADMIN.split(';');
+			emails = emails.concat(team.teamLeaderMail);
+			sendMail(mo, emails);
+
+			answer = true;
+		} else answer = false;
+
 	} catch (error) {
-		console.log('Couldn\'t upload image!!')
 		console.log(error);
 	}
-
-	//Création de l'id de validation qu'on va envoyer au admins
-	var validationId = 'user:' + makeId(5) + ':' + encodeURI(id) + ':' + encodeURI(pseudo) + ':' + encodeURI(teamId) + ':' + encodeURI(imageUrl);
-
-	//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
-	var res = await db.addPendingValidation(validationId);
-
-	//Si tout à réussi, on envoie un mail au admins
-	if (res) {
-		var mo = mailOptions;
-		mo.subject = 'Joueur à créer: ' + pseudo;
-		mo.text = `Joueur a créer: \n${pseudo} - identifiant: ${id}\nPhoto de profil: ${imageUrl}\nValider le défi: ${server_url }/${validationId}`;
-
-		var emails = process.env.MAIL_ADMIN.split(';');
-		emails = emails.concat(team.teamLeaderMail);
-		sendMail(mo, emails);
-
-		answer = true;
-	} else answer = false;
 
 	return answer;
 }
 
 async function validateChallenge(body) {
-	var answer;
-	//Récupère les id
-	var userId = body.data.validatedUserId;
-	var challengeId = body.data.validatedChallengeId;
-	var user = await db.getPlayer(userId);
-	var team = await db.getTeam(user.teamId);
-	var challenge = await db.getDefi(challengeId);
-	if (team == null || challenge == null) {
-		answer = false;
-		return answer;
-	}
-
-	//Image en base64
-	var imageBase64 = body.data.validatedChallengeImage;
-
-	//Envoi de l'image sur imgur
-	var imageUrl = 'https://i.imgur.com/V4RclNb.png';
+	var answer = true;
 	try {
-		imageUrl = (await uploadImage(imageBase64));
+
+		//Récupère les id
+		var userId = body.data.validatedUserId;
+		var challengeId = body.data.validatedChallengeId;
+		var user = await db.getPlayer(userId);
+		var team = await db.getTeam(user.teamId);
+		var challenge = await db.getDefi(challengeId);
+		if (team == null || challenge == null) {
+			answer = false;
+			return answer;
+		}
+
+		//Image en base64
+		var imageBase64 = body.data.validatedChallengeImage;
+
+		//Envoi de l'image sur imgur
+		var imageUrl = 'https://i.imgur.com/V4RclNb.png';
+		try {
+			imageUrl = (await uploadImage(imageBase64));
+		} catch (error) {
+			console.log('Couldn\'t upload image!!')
+			console.log(error);
+		}
+
+		//Création de l'id de validation qu'on va envoyer au admins
+		var validationId = 'defi:' + makeId(5) + ':' + encodeURI(userId) + ':' + encodeURI(challengeId);
+
+		//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
+		var res = await db.addPendingValidation(validationId);
+
+		//Si tout à réussi, on envoie un mail au admins
+		if (res) {
+			var mo = mailOptions;
+			mo.subject = `Défi à valider pour ${userId}`;
+			mo.text = `Défi à valider: \n${challenge.name} - ${challenge.points} points\nPreuve photo: ${imageUrl}\nValider le défi: ${server_url}/${validationId}`;
+
+			var emails = process.env.MAIL_ADMIN.split(';');
+			emails = emails.concat(team.teamLeaderMail);
+			sendMail(mo, emails);
+
+			answer = true;
+		} else answer = false;
 	} catch (error) {
-		console.log('Couldn\'t upload image!!')
 		console.log(error);
 	}
-
-	//Création de l'id de validation qu'on va envoyer au admins
-	var validationId = 'defi:' + makeId(5) + ':' + encodeURI(userId) + ':' + encodeURI(challengeId);
-
-	//On ajoute l'id de validation a la base de donnée pour que ce ne soit pas perdu lors d'un redémarrage
-	var res = await db.addPendingValidation(validationId);
-
-	//Si tout à réussi, on envoie un mail au admins
-	if (res) {
-		var mo = mailOptions;
-		mo.subject = `Défi à valider pour ${userId}`;
-		mo.text = `Défi à valider: \n${challenge.name} - ${challenge.points} points\nPreuve photo: ${imageUrl}\nValider le défi: ${server_url }/${validationId}`;
-
-		var emails = process.env.MAIL_ADMIN.split(';');
-		emails = emails.concat(team.teamLeaderMail);
-		sendMail(mo, emails);
-
-		answer = true;
-	} else answer = false;
 	return answer;
 }
 
@@ -389,7 +400,7 @@ async function uploadImage(imageBase64) {
 			return false;
 		}
 	} catch (error) {
-                console.log(error);
+		console.log(error);
 		return 'https://i.imgur.com/AJ3InNO.png';
 	}
 }
