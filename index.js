@@ -22,7 +22,7 @@ INITIALISATION
 async function init() {
 	db.initRedis();
 	await googlesheet.initSheetReader();
-	await googlesheet.reloadChallenges();
+	//await googlesheet.reloadChallenges();
 }
 init();
 
