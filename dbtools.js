@@ -52,7 +52,7 @@ async function getAllPlayers() {
 	console.log("Getting players");
 	const players_vals = await client.hVals(playerHashName);
 
-	const players = players_vals.map(player => JSON.parse(player));
+	const players = await players_vals.map(player => JSON.parse(player));
 
 	return players;
 }
