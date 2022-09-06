@@ -34,9 +34,9 @@ async function reloadChallenges() {
 
         //add all new challenges
         rows.forEach(row => {
-            if (row.identifiant != "" && row.nom != "" && row.description != "" && row.points != "" && row.image != "" && row.team_uniquement != "") {
-                console.log(`Id: ${row.identifiant}, nom: ${row.nom}, description: ${row.description}, points: ${row.points}, image: ${row.image}`);
-                db.createDefi(row.identifiant, row.nom, row.description, parseInt(row.points), row.image, row.team_uniquement == "TRUE");
+            if (row.identifiant != "" && row.nom != "" && row.description != "" && row.points != "" && row.image != "" && row.team_uniquement != "" && row.actif) {
+                console.log(`Id: ${row.identifiant}, nom: ${row.nom}`);
+                db.createDefi(row.identifiant, row.nom, row.description, parseInt(row.points), row.image, row.team_uniquement == "TRUE", row.faisable_x_fois != "" ? parseInt(row.faisable_x_fois) : 1, row.actif == "TRUE");
             }
         });
 

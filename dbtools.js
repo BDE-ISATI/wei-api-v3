@@ -94,10 +94,15 @@ async function validateChallenge(id, defiId) {
 	const player = await client.hGet(playerHashName, id);
 	const json = JSON.parse(player);
 
-	if (json.challenges_done.includes(defiId) || defi.teamOnly != json.isTeam) {
+	var count = 0;
+	defi.challenges_done.foreach(challenge => {
+		if (challenge == id) count++;
+	});
+
+	if (count >= defi.faisableXFois || defi.teamOnly != json.isTeam) {
 		return false;
 	} else {
-		json.challenges_done.push(defi.id);
+		json.challenges_done.push(defiId);
 		json.points = json.points + defi.points;
 
 		const res = await client.hSet(playerHashName, id, JSON.stringify(json));
@@ -114,14 +119,16 @@ async function getAllDefi() {
 	return defis;
 }
 
-async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl, defiTeamOnly) {
+async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl, defiTeamOnly, faisableXFois, actif) {
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
 		description: defiDescription,
 		points: defiPoints,
 		image: defiImageUrl,
-		teamOnly: defiTeamOnly
+		teamOnly: defiTeamOnly,
+		faisableXFois: faisableXFois,
+		actif: actif
 	}))
 
 	return defi >= 1;
