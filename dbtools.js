@@ -89,10 +89,12 @@ async function deletePlayer(id) {
 async function validateChallenge(id, defiId) {
 	const defi = await getDefi(defiId);
 
+	if (defi == null) return false;
+
 	const player = await client.hGet(playerHashName, id);
 	const json = JSON.parse(player);
 
-	if (json.challenges_done.includes(defi.id) || defi.teamOnly != json.isTeam) {
+	if (json.challenges_done.includes(defiId) || defi.teamOnly != json.isTeam) {
 		return false;
 	} else {
 		json.challenges_done.push(defi.id);
