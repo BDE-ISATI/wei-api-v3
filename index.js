@@ -235,9 +235,7 @@ async function createPlayer(body) {
 	if (res) {
 		var mo = mailOptions;
 		mo.subject = 'Joueur à créer: ' + pseudo;
-		mo.text = 'Joueur à créer: ' + pseudo + ', id: ' + id + '\n'
-			+ 'Image: ' + 'https://i.imgur.com/' + imageUrl + '\n'
-			+ 'Créer le joueur: ' + server_url + '/' + validationId;
+		mo.text = `Joueur a créer: \n${pseudo} - identifiant: ${id}\nPhoto de profil: ${imageUrl}\nValider le défi: ${server_url }/${validationId}`;
 
 		var emails = process.env.MAIL_ADMIN.split(';');
 		emails = emails.concat(team.teamLeaderMail);
@@ -256,7 +254,8 @@ async function validateChallenge(body) {
 	var challengeId = body.data.validatedChallengeId;
 	var user = await db.getPlayer(userId);
 	var team = await db.getTeam(user.teamId);
-	if (team == null) {
+	var challenge = await db.getDefi(challengeId);
+	if (team == null || challenge == null) {
 		answer = false;
 		return answer;
 	}
@@ -282,10 +281,8 @@ async function validateChallenge(body) {
 	//Si tout à réussi, on envoie un mail au admins
 	if (res) {
 		var mo = mailOptions;
-		mo.subject = 'Défi à valider pour ' + userId;
-		mo.text = 'Défi à valider: ' + challengeId + ' pour ' + userId + '\n'
-			+ 'Preuve photo: ' + imageUrl + '\n'
-			+ 'Valider le défi: ' + server_url + '/' + validationId;
+		mo.subject = `Défi à valider pour ${userId}`;
+		mo.text = `Défi à valider: \n${challenge.name} - ${challenge.points} points\nPreuve photo: ${imageUrl}\nValider le défi: ${server_url }/${validationId}`;
 
 		var emails = process.env.MAIL_ADMIN.split(';');
 		emails = emails.concat(team.teamLeaderMail);
