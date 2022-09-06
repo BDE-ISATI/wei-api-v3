@@ -392,6 +392,7 @@ async function uploadImage(imageBase64) {
 			return false;
 		}
 	} catch (error) {
+                console.log(error);
 		return 'https://i.imgur.com/AJ3InNO.png';
 	}
 }
