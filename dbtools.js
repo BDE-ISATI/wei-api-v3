@@ -177,7 +177,7 @@ async function getTeam(teamId) {
 	const points = await teamPlayers.reduce((previous, current) => previous + current.points, 0);
 
 	team.points = points;
-	delete team.teamLeaderMail;
+
 
 	return team;
 }
