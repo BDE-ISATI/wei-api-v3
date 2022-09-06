@@ -49,6 +49,7 @@ async function initRedis() {
  * @returns a list of all players in the db (as json objects)
  */
 async function getAllPlayers() {
+	console.log("Getting players");
 	const players_vals = await client.hVals(playerHashName);
 
 	const players = players_vals.map(player => JSON.parse(player));
@@ -57,6 +58,7 @@ async function getAllPlayers() {
 }
 
 async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {
+	console.log("Creating player");
 	//Avoid overwriting player
 	if (await client.hGet(playerHashName, id) != null) return false;
 
@@ -74,6 +76,7 @@ async function createPlayer(id, name, teamId, profilePictureUrl, isTeam) {
 }
 
 async function getPlayer(id) {
+	console.log("Getting player");
 	const player_val = await client.hGet(playerHashName, id);
 	const player = await JSON.parse(player_val);
 
@@ -81,19 +84,21 @@ async function getPlayer(id) {
 }
 
 async function deletePlayer(id) {
+	console.log("Deleting player");
 	const player = await client.hDel(playerHashName, id);
 
 	return player >= 1;
 }
 
 async function validateChallenge(id, defiId) {
+	console.log("Validating challenge");
 	const defi = await getDefi(defiId);
 	const player = await getPlayer(id);
 
 	if (defi == null && player == null) return false;
 
 	var count = 0;
-	player.challenges_done.foreach(challenge => {
+	player.challenges_done.forEach(challenge => {
 		if (challenge == id) count++;
 	});
 
@@ -110,6 +115,7 @@ async function validateChallenge(id, defiId) {
 }
 
 async function getAllDefi() {
+	console.log("Loading challenges");
 	const defis_keys = await client.hVals(defiHashName);
 
 	const defis = defis_keys.map(defi => JSON.parse(defi));
@@ -118,6 +124,7 @@ async function getAllDefi() {
 }
 
 async function createDefi(defiId, defiName, defiDescription, defiPoints, defiImageUrl, defiTeamOnly, faisableXFois, actif) {
+	console.log("Creating challenge");
 	const defi = await client.hSet(defiHashName, defiId, JSON.stringify({
 		name: defiName,
 		id: defiId,
