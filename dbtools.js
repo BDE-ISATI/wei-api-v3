@@ -95,7 +95,7 @@ async function validateChallenge(id, defiId) {
 	const json = JSON.parse(player);
 
 	var count = 0;
-	defi.challenges_done.foreach(challenge => {
+	player.challenges_done.foreach(challenge => {
 		if (challenge == id) count++;
 	});
 
