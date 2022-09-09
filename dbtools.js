@@ -159,14 +159,14 @@ async function getDefi(defiId) {
 }
 
 async function addPendingValidation(validationId) {
-	console.log("Add validation");
+	console.log("Add validation: " + validationId);
 	const res = await client.sAdd(validationSetName, validationId);
 
 	return res >= 1;
 }
 
 async function tryValidation(validationId) {
-	console.log("try validation");
+	console.log("try validation: " + validationId);
 	const res = await client.sRem(validationSetName, validationId);
 
 	return res >= 1;
