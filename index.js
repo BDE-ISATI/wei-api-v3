@@ -268,6 +268,11 @@ async function validateChallenge(body) {
 			return answer;
 		}
 
+		if (!challenge.actif) {
+			answer = false;
+			return answer;
+		}
+
 		//Image en base64
 		var imageBase64 = body.data.validatedChallengeImage;
 
