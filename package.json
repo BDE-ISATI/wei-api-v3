@@ -1,22 +1,22 @@
 {
   "name": "wei_app_server",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "Developpement branch for the more stable, more secured and more efficient wei app server version 2, used by ISATI at the ESIR Engineering school.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "toheroku": "git push heroku main"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Edorion",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BDE-ISATI/wei_app_server.git"
+  },
+  "author": "",
   "license": "ISC",
-  "dependencies": {
-    "google-spreadsheet": "^3.3.0",
-    "heroku-client": "^3.1.0",
-    "hybrid-crypto-js": "^0.2.4",
-    "nodemailer": "^6.7.8",
-    "redis": "^4.1.0"
+  "bugs": {
+    "url": "https://github.com/BDE-ISATI/wei_app_server/issues"
   },
-  "engines": {
-    "node": "18.x"
+  "homepage": "https://github.com/BDE-ISATI/wei_app_server#readme",
+  "dependencies": {
+    "http": "^0.0.1-security"
   }
 }
